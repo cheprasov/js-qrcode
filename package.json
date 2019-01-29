@@ -1,0 +1,47 @@
+{
+  "name": "@cheprasov/qrcode",
+  "version": "0.1.0",
+  "author": "Alexander Cheprasov",
+  "description": "",
+  "keywords": [
+    "qr",
+    "qrcode"
+  ],
+  "main": "dist/qrcode.js",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cheprasov/js-qrcode.git"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.1.5",
+    "@babel/core": "^7.2.2",
+    "@babel/plugin-proposal-class-properties": "^7.2.1",
+    "@babel/plugin-transform-arrow-functions": "^7.0.0",
+    "@babel/preset-env": "^7.1.5",
+    "@babel/preset-flow": "^7.0.0",
+    "babel-core": "^7.0.0-bridge.0",
+    "babel-eslint": "^10.0.1",
+    "babel-jest": "^23.6.0",
+    "babel-loader": "^8.0.4",
+    "babel-preset-minify": "^0.5.0",
+    "eslint": "^5.9.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "flow-bin": "^0.83.0",
+    "jest": "^23.6.0",
+    "webpack": "^4.25.1",
+    "webpack-cli": "^3.1.2"
+  },
+  "scripts": {
+    "build:prod": "webpack --mode production",
+    "build": "webpack --mode development",
+    "build:watch": "webpack --watch --mode development",
+    "flow": "flow",
+    "eslint": "node ./node_modules/.bin/eslint ./app/src/",
+    "test": "jest"
+  },
+  "dependencies": {
+    "qr.js": "0.0.0"
+  }
+}
