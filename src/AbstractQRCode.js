@@ -23,6 +23,7 @@ const DEFAULT_CONSTRUCTOR_PARAMS: OptionsType = {
     level: ERROR_CORRECTION_LEVEL_LOW,
     padding: 1,
     typeNumber: 0,
+    errorsEnabled: false,
 };
 
 export default class AbstractQRCode {
@@ -30,8 +31,10 @@ export default class AbstractQRCode {
     value: string;
     level: ErrorCorrectionLevelType;
     typeNumber: number;
-    qrCodeData: ?QRCodeDataType;
     padding: number;
+    errorsEnabled: boolean;
+
+    qrCodeData: ?QRCodeDataType;
 
     constructor(value: string, options: OptionsType = {}) {
         const params = { ...DEFAULT_CONSTRUCTOR_PARAMS, ...options };
@@ -40,6 +43,7 @@ export default class AbstractQRCode {
         this.level = params.level;
         this.typeNumber = params.typeNumber;
         this.padding = params.padding;
+        this.errorsEnabled = params.errorsEnabled;
     }
 
     getSize(): number {
@@ -47,12 +51,19 @@ export default class AbstractQRCode {
         return data ? data.length : 0;
     }
 
-    getData(): QRCodeDataType {
+    getData(): ?QRCodeDataType {
         if (!this.qrCodeData) {
-            const qrcode = new QRCodeImpl(this.typeNumber, ErrorCorrectLevel[this.level]);
-            qrcode.addData(this.value);
-            qrcode.make();
-            this.qrCodeData = qrcode.modules;
+            try {
+                const qrcode = new QRCodeImpl(this.typeNumber, ErrorCorrectLevel[this.level]);
+                qrcode.addData(this.value);
+                qrcode.make();
+                this.qrCodeData = qrcode.modules;
+            } catch (error) {
+                if (this.errorsEnabled) {
+                    throw error;
+                }
+                return null;
+            }
         }
         return this.qrCodeData;
     }

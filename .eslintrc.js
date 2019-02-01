@@ -27,6 +27,7 @@ module.exports = {
         "no-param-reassign": ["error", { "props": false }],
         "no-plusplus": "off",
         "prefer-destructuring": "off",
+        "arrow-body-style": "off",
     },
     "env": {
         "browser": true,

@@ -34,12 +34,16 @@ export default class QRCodeTerminal extends AbstractQRCode {
         return '';
     }
 
-    getAsText(): string {
+    toText(): ?string {
         if (this.qrCodeText) {
             return this.qrCodeText;
         }
 
         const size = this.getSize();
+        if (size === 0) {
+            return null;
+        }
+
         const data = this.getData();
         const symbols = [];
 
