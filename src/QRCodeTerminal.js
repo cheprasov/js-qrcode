@@ -1,7 +1,7 @@
 // @flow
 
-import AbstractQRCode from './AbstractQRCode';
-import type { OptionsType as ParentOptionsType } from './AbstractQRCode';
+import QRCodeRaw from './QRCodeRaw';
+import type { OptionsType as ParentOptionsType } from './QRCodeRaw';
 
 export type OptionsType = ParentOptionsType & {
     blackSymbol: string,
@@ -13,7 +13,7 @@ const DEFAULT_OPTIONS = {
     whiteSymbol: '▓▓',
 };
 
-export default class QRCodeTerminal extends AbstractQRCode {
+export default class QRCodeTerminal extends QRCodeRaw {
 
     blackSymbol: string;
     whiteSymbol: string;
@@ -25,6 +25,11 @@ export default class QRCodeTerminal extends AbstractQRCode {
 
         this.blackSymbol = params.blackSymbol;
         this.whiteSymbol = params.whiteSymbol;
+    }
+
+    _clearCache(): void {
+        super._clearCache();
+        this.qrCodeText = null;
     }
 
     _getRowPadding(size: number, padding: number): string {
@@ -39,26 +44,26 @@ export default class QRCodeTerminal extends AbstractQRCode {
             return this.qrCodeText;
         }
 
-        const size = this.getSize();
-        if (size === 0) {
+        const dataSize = this.getDataSize();
+        if (dataSize === 0) {
             return null;
         }
 
         const data = this.getData();
         const symbols = [];
 
-        const rowPadding = this._getRowPadding(size, this.padding);
+        const rowPadding = this._getRowPadding(dataSize, this.padding);
         const columnPadding = this.whiteSymbol.repeat(this.padding);
 
         if (rowPadding) {
             symbols.push(rowPadding);
         }
 
-        for (let y = 0; y < size; y += 1) {
+        for (let y = 0; y < dataSize; y += 1) {
             if (columnPadding) {
                 symbols.push(columnPadding);
             }
-            for (let x = 0; x < size; x += 1) {
+            for (let x = 0; x < dataSize; x += 1) {
                 const isBlack = data[y][x];
                 symbols.push(isBlack ? this.blackSymbol : this.whiteSymbol);
             }

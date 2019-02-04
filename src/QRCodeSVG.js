@@ -1,11 +1,11 @@
 // @flow
 
-import AbstractQRCode from './AbstractQRCode';
-import type { OptionsType as ParentOptionsType } from './AbstractQRCode';
+import QRCodeRaw from './QRCodeRaw';
+import type { OptionsType as ParentOptionsType } from './QRCodeRaw';
 
 export type OptionsType = ParentOptionsType & {
     fgColor: string,
-    bgColor: ?string,
+    bgColor?: string,
 }
 
 const DEFAULT_OPTIONS = {
@@ -34,7 +34,7 @@ type RectsMapItemType = {
     relative: boolean;
 };
 
-export default class QRCodeSVG extends AbstractQRCode {
+export default class QRCodeSVG extends QRCodeRaw {
 
     fgColor: string;
     bgColor: string;
@@ -49,14 +49,20 @@ export default class QRCodeSVG extends AbstractQRCode {
         this.bgColor = params.bgColor;
     }
 
+    _clearCache(): void {
+        super._clearCache();
+        this.qrCodeHTML = null;
+        this.qrCodeDataUrl = null;
+    }
+
     _getDataInt(): ?DataIntType {
         const data = this.getData();
         if (!data) {
             return null;
         }
         // copy Array<Array<boolean>> to Array<Array<number>>
-        return data.map((list) => {
-            return list.map((isBlack) => {
+        return data.map((row) => {
+            return row.map((isBlack) => {
                 return isBlack ? TYPE_INT_BLACK : TYPE_INT_WHITE;
             });
         });
@@ -142,12 +148,13 @@ export default class QRCodeSVG extends AbstractQRCode {
     }
 
     _buildSVG(size: number, padding: number, rects: Array<RectType>): string {
+        const sizeWithPadding = size + padding * 2;
         const tags = [
-            `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" shape-rendering="crispEdges" viewBox="0 0 ${size} ${size}">`,
+            `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" shape-rendering="crispEdges" viewBox="0 0 ${sizeWithPadding} ${sizeWithPadding}">`,
         ];
 
         if (this.bgColor) {
-            tags.push(`<rect x="0" y="0" height="${size}" width="${size}" fill="${this.bgColor}" />`);
+            tags.push(`<rect x="0" y="0" height="${sizeWithPadding}" width="${sizeWithPadding}" fill="${this.bgColor}" />`);
         }
 
         rects.forEach((rect: RectType) => {
@@ -158,7 +165,7 @@ export default class QRCodeSVG extends AbstractQRCode {
                 );
             } else {
                 tags.push(
-                    `<use xlink:href="#${rect.id}" x="${rect.x + padding}" y="${rect.y + padding}" />`,
+                    `<use xlink:href="#${rect.id}" x="${rect.x}" y="${rect.y}" />`,
                 );
             }
             tags.push('\n');
@@ -168,10 +175,10 @@ export default class QRCodeSVG extends AbstractQRCode {
         return tags.join('');
     }
 
-    toHTML(): string {
+    toHTML(): ?string {
         if (!this.qrCodeHTML) {
-            const size = this.getSize();
-            if (size === 0) {
+            const dataSize = this.getDataSize();
+            if (dataSize === 0) {
                 return null;
             }
 
@@ -180,19 +187,19 @@ export default class QRCodeSVG extends AbstractQRCode {
                 return null;
             }
 
-            this.qrCodeHTML = this._buildSVG(size + this.padding * 2, this.padding, rects);
+            this.qrCodeHTML = this._buildSVG(dataSize, this.padding, rects);
         }
 
         return this.qrCodeHTML;
     }
 
-    toDataUrl(): string {
+    toDataUrl(): ?string {
         if (this.qrCodeDataUrl) {
             return this.qrCodeDataUrl;
         }
 
-        const size = this.getSize();
-        if (size === 0) {
+        const dataSize = this.getDataSize();
+        if (dataSize === 0) {
             return null;
         }
 
@@ -237,7 +244,7 @@ export default class QRCodeSVG extends AbstractQRCode {
             }
         });
 
-        const html = this._buildSVG(size + this.padding * 2, this.padding, relativeRects);
+        const html = this._buildSVG(dataSize, this.padding, relativeRects);
         this.qrCodeDataUrl = `data:image/svg+xml;base64,${btoa(html)}`;
         return this.qrCodeDataUrl;
     }

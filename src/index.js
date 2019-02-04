@@ -1,9 +1,6 @@
-import QRCodeSVG from './QRCodeSVG';
+// @flow
 
-const qrcode = new QRCodeSVG('https://www.facebook.com/cheprasov.alexander');
-qrcode.padding = 0;
-console.log('html', btoa(qrcode.toHTML()).length);
-console.log('dataUrl', qrcode.toDataUrl().length);
-document.writeln(qrcode.toHTML());
-document.writeln(`<img src="${qrcode.toDataUrl()}" />`);
-//document.writeln(qrcode.toDataUrl());
+export { default as QRCodeCanvas } from './QRCodeCanvas';
+export { default as QRCodeRaw } from './QRCodeRaw';
+export { default as QRCodeSVG } from './QRCodeSVG';
+export { default as QRCodeTerminal } from './QRCodeTerminal';

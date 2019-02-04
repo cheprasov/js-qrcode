@@ -17,7 +17,7 @@ module.exports = {
                 "allowSamePrecedence": true
             }
         ],
-        "no-underscore-dangle": ["error", { "allowAfterThis": true }],
+        "no-underscore-dangle": ["error", { "allowAfterThis": true, "allowAfterSuper": true }],
         "max-len": ["error", { "code": 120 }],
         "spaced-comment": [0],
         "import/no-useless-path-segments": ["never"],

@@ -26,7 +26,7 @@ const DEFAULT_CONSTRUCTOR_PARAMS: OptionsType = {
     errorsEnabled: false,
 };
 
-export default class AbstractQRCode {
+export default class QRCodeRaw {
 
     value: string;
     level: ErrorCorrectionLevelType;
@@ -46,9 +46,18 @@ export default class AbstractQRCode {
         this.errorsEnabled = params.errorsEnabled;
     }
 
-    getSize(): number {
+    setValue(value: string) {
+        this.value = value;
+        this._clearCache();
+    }
+
+    getDataSize(): number {
         const data = this.getData();
         return data ? data.length : 0;
+    }
+
+    _clearCache(): void {
+        this.qrCodeData = null;
     }
 
     getData(): ?QRCodeDataType {
@@ -58,6 +67,7 @@ export default class AbstractQRCode {
                 qrcode.addData(this.value);
                 qrcode.make();
                 this.qrCodeData = qrcode.modules;
+                Object.freeze(this.qrCodeData);
             } catch (error) {
                 if (this.errorsEnabled) {
                     throw error;
