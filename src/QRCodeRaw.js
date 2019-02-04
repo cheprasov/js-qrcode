@@ -1,6 +1,6 @@
 // @flow
 
-import QRCodeImpl from 'qr.js/lib/QRCode';
+import QRCodeCore from 'qr.js/lib/QRCode';
 import ErrorCorrectLevel from 'qr.js/lib/ErrorCorrectLevel';
 
 const ERROR_CORRECTION_LEVEL_LOW = 'L'; // Allows recovery of up to 7% data loss
@@ -15,6 +15,7 @@ export type OptionsType = {
     level: ErrorCorrectionLevelType,
     typeNumber: number,
     padding: number,
+    errorsEnabled: boolean,
 };
 
 export type QRCodeDataType = Array<Array<boolean>>;
@@ -46,7 +47,7 @@ export default class QRCodeRaw {
         this.errorsEnabled = params.errorsEnabled;
     }
 
-    setValue(value: string) {
+    setValue(value: string): void {
         this.value = value;
         this._clearCache();
     }
@@ -63,7 +64,7 @@ export default class QRCodeRaw {
     getData(): ?QRCodeDataType {
         if (!this.qrCodeData) {
             try {
-                const qrcode = new QRCodeImpl(this.typeNumber, ErrorCorrectLevel[this.level]);
+                const qrcode = new QRCodeCore(this.typeNumber, ErrorCorrectLevel[this.level]);
                 qrcode.addData(this.value);
                 qrcode.make();
                 this.qrCodeData = qrcode.modules;
