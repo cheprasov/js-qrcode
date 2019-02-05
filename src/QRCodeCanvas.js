@@ -58,9 +58,9 @@ export default class QRCodeCanvas extends QRCodeRaw {
             return this.size;
         }
         if (this.scale) {
-            return this.scale * (dataSize + this.padding * 2);
+            return this.scale * dataSize;
         }
-        return dataSize + this.padding * 2;
+        return dataSize;
     }
 
     _convertHexColorToNumbers(hexColor: string): ?string {
@@ -109,7 +109,7 @@ export default class QRCodeCanvas extends QRCodeRaw {
                 if (isBlack) {
                     bytes.set(fgColor, index);
                 } else {
-                    bytes.set([0, 0, 0, 0], index);
+                    bytes.set(bgColor, index);
                 }
                 index += 4;
             });
@@ -126,19 +126,7 @@ export default class QRCodeCanvas extends QRCodeRaw {
         this.qrCodeCanvas.width = canvasSize;
         this.qrCodeCanvas.height = canvasSize;
         this.qrCodeCanvasContext.imageSmoothingEnabled = false;
-
-        this.qrCodeCanvasContext.fillStyle = `rgba(${bgColor.slice(0, 3).join(',')},${bgColor[3] / 255})`;
-        this.qrCodeCanvasContext.fillRect(0, 0, canvasSize, canvasSize);
-
-        const padding = canvasSize / (dataSize + this.padding * 2) * this.padding;
-
-        this.qrCodeCanvasContext.drawImage(
-            this.canvas,
-            padding,
-            padding,
-            this.qrCodeCanvas.width - padding * 2,
-            this.qrCodeCanvas.height - padding * 2,
-        );
+        this.qrCodeCanvasContext.drawImage(this.canvas, 0, 0, this.qrCodeCanvas.width, this.qrCodeCanvas.height);
 
         return true;
     }
@@ -150,7 +138,6 @@ export default class QRCodeCanvas extends QRCodeRaw {
             }
             this.qrCodeDataUrl = this.qrCodeCanvas.toDataURL(type, encoderOptions);
         }
-
         return this.qrCodeDataUrl;
     }
 

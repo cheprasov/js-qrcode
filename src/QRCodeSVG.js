@@ -147,21 +147,20 @@ export default class QRCodeSVG extends QRCodeRaw {
         };
     }
 
-    _buildSVG(size: number, padding: number, rects: Array<RectType>): string {
-        const sizeWithPadding = size + padding * 2;
+    _buildSVG(size: number, rects: Array<RectType>): string {
         const tags = [
-            `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" shape-rendering="crispEdges" viewBox="0 0 ${sizeWithPadding} ${sizeWithPadding}">`,
+            `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" shape-rendering="crispEdges" viewBox="0 0 ${size} ${size}">`,
         ];
 
         if (this.bgColor) {
-            tags.push(`<rect x="0" y="0" height="${sizeWithPadding}" width="${sizeWithPadding}" fill="${this.bgColor}" />`);
+            tags.push(`<rect x="0" y="0" height="${size}" width="${size}" fill="${this.bgColor}" />`);
         }
 
         rects.forEach((rect: RectType) => {
             if (rect.width && rect.height) {
                 const rectId = rect.id ? `id="${rect.id}" ` : '';
                 tags.push(
-                    `<rect ${rectId}x="${rect.x + padding}" y="${rect.y + padding}" height="${rect.height}" width="${rect.width}" fill="${this.fgColor}" />`,
+                    `<rect ${rectId}x="${rect.x}" y="${rect.y}" height="${rect.height}" width="${rect.width}" fill="${this.fgColor}" />`,
                 );
             } else {
                 tags.push(
@@ -187,7 +186,7 @@ export default class QRCodeSVG extends QRCodeRaw {
                 return null;
             }
 
-            this.qrCodeHTML = this._buildSVG(dataSize, this.padding, rects);
+            this.qrCodeHTML = this._buildSVG(dataSize, rects);
         }
 
         return this.qrCodeHTML;
@@ -244,7 +243,7 @@ export default class QRCodeSVG extends QRCodeRaw {
             }
         });
 
-        const html = this._buildSVG(dataSize, this.padding, relativeRects);
+        const html = this._buildSVG(dataSize, relativeRects);
         this.qrCodeDataUrl = `data:image/svg+xml;base64,${btoa(html)}`;
         return this.qrCodeDataUrl;
     }

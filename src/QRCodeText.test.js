@@ -1,8 +1,8 @@
 // @flow
 
-import QRCodeTerminal from './QRCodeTerminal';
+import QRCodeText from './QRCodeText';
 
-describe('QRCodeTerminal', () => {
+describe('QRCodeText', () => {
 
     describe('constructor', () => {
         it('test', () => {

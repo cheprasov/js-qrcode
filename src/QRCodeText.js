@@ -13,7 +13,7 @@ const DEFAULT_OPTIONS = {
     whiteSymbol: '▓▓',
 };
 
-export default class QRCodeTerminal extends QRCodeRaw {
+export default class QRCodeText extends QRCodeRaw {
 
     blackSymbol: string;
     whiteSymbol: string;
@@ -32,13 +32,6 @@ export default class QRCodeTerminal extends QRCodeRaw {
         this.qrCodeText = null;
     }
 
-    _getRowPadding(size: number, padding: number): string {
-        if (padding) {
-            return `${this.whiteSymbol.repeat(padding * 2 + size)}\n`.repeat(padding);
-        }
-        return '';
-    }
-
     toText(): ?string {
         if (this.qrCodeText) {
             return this.qrCodeText;
@@ -52,33 +45,14 @@ export default class QRCodeTerminal extends QRCodeRaw {
         const data = this.getData();
         const symbols = [];
 
-        const rowPadding = this._getRowPadding(dataSize, this.padding);
-        const columnPadding = this.whiteSymbol.repeat(this.padding);
-
-        if (rowPadding) {
-            symbols.push(rowPadding);
-        }
-
         for (let y = 0; y < dataSize; y += 1) {
-            if (columnPadding) {
-                symbols.push(columnPadding);
-            }
             for (let x = 0; x < dataSize; x += 1) {
                 const isBlack = data[y][x];
                 symbols.push(isBlack ? this.blackSymbol : this.whiteSymbol);
             }
-            if (columnPadding) {
-                symbols.push(columnPadding);
-            }
             symbols.push('\n');
         }
-
-        if (rowPadding) {
-            symbols.push(rowPadding);
-        }
-
         this.qrCodeText = symbols.join('');
-
         return this.qrCodeText;
     }
 

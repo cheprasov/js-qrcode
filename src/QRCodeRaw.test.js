@@ -20,6 +20,7 @@ describe('QRCodeRaw', () => {
             expect(qrCode.level).toEqual('L');
             expect(qrCode.typeNumber).toEqual(0);
             expect(qrCode.errorsEnabled).toBeFalsy();
+            expect(qrCode.invert).toBeFalsy();
         });
 
         it('should default params for not specified params', () => {
@@ -29,15 +30,26 @@ describe('QRCodeRaw', () => {
             expect(qrCode.level).toEqual('Q');
             expect(qrCode.typeNumber).toEqual(0);
             expect(qrCode.errorsEnabled).toBeFalsy();
+            expect(qrCode.invert).toBeFalsy();
         });
 
         it('should use specified params', () => {
-            const qrCode = new QRCodeRaw('test 84', { level: 'H', padding: 0, typeNumber: 20, errorsEnabled: true });
+            const qrCode = new QRCodeRaw(
+                'test 84',
+                {
+                    level: 'H',
+                    padding: 0,
+                    typeNumber: 20,
+                    invert: true,
+                    errorsEnabled: true,
+                },
+            );
             expect(qrCode.value).toEqual('test 84');
             expect(qrCode.padding).toEqual(0);
             expect(qrCode.level).toEqual('H');
             expect(qrCode.typeNumber).toEqual(20);
             expect(qrCode.errorsEnabled).toBeTruthy();
+            expect(qrCode.invert).toBeTruthy();
         });
     });
 
@@ -75,10 +87,98 @@ describe('QRCodeRaw', () => {
         });
     });
 
+    describe('_getQrCodeData', () => {
+        let qrCode;
+
+        beforeEach(() => {
+            qrCode = new QRCodeRaw('test', { padding: 0 });
+        });
+
+        it('should return deep cloned arrays', () => {
+            const source = [
+                [true, true, true],
+                [true, false, true],
+                [true, true, true],
+            ];
+            const result = qrCode._getQrCodeData(source);
+            expect(result).toEqual(source);
+            expect(result).not.toBe(source);
+            source[1][1] = true;
+            expect(result).not.toEqual(source);
+        });
+
+        it('should invert data if the param is enabled', () => {
+            const source = [
+                [false, true, true],
+                [true, false, true],
+                [false, true, true],
+            ];
+            qrCode.invert = true;
+            const result = qrCode._getQrCodeData(source);
+            expect(result).toEqual([
+                [true, false, false],
+                [false, true, false],
+                [true, false, false],
+            ]);
+        });
+
+        it('should add padding to data', () => {
+            const source = [
+                [false, true, true],
+                [true, false, true],
+                [false, true, true],
+            ];
+            qrCode.padding = 1;
+            expect(qrCode._getQrCodeData(source)).toEqual([
+                [false, false, false, false, false],
+                [false, false, true, true, false],
+                [false, true, false, true, false],
+                [false, false, true, true, false],
+                [false, false, false, false, false],
+            ]);
+
+            qrCode.padding = 3;
+            expect(qrCode._getQrCodeData(source)).toEqual([
+                [false, false, false, false, false, false, false, false, false],
+                [false, false, false, false, false, false, false, false, false],
+                [false, false, false, false, false, false, false, false, false],
+                [false, false, false, false, true, true, false, false, false],
+                [false, false, false, true, false, true, false, false, false],
+                [false, false, false, false, true, true, false, false, false],
+                [false, false, false, false, false, false, false, false, false],
+                [false, false, false, false, false, false, false, false, false],
+                [false, false, false, false, false, false, false, false, false],
+            ]);
+        });
+
+        it('should invert data with padding', () => {
+            const source = [
+                [false, true, true],
+                [true, false, true],
+                [false, true, true],
+            ];
+
+            qrCode.invert = true;
+            qrCode.padding = 3;
+            expect(qrCode._getQrCodeData(source)).toEqual([
+                [true, true, true, true, true, true, true, true, true],
+                [true, true, true, true, true, true, true, true, true],
+                [true, true, true, true, true, true, true, true, true],
+                [true, true, true, true, false, false, true, true, true],
+                [true, true, true, false, true, false, true, true, true],
+                [true, true, true, true, false, false, true, true, true],
+                [true, true, true, true, true, true, true, true, true],
+                [true, true, true, true, true, true, true, true, true],
+                [true, true, true, true, true, true, true, true, true],
+            ]);
+        });
+    });
+
     describe('getData', () => {
         let qrCode;
+
         beforeEach(() => {
-            qrCode = new QRCodeRaw('test');
+            qrCode = new QRCodeRaw('test', { padding: 0 });
         });
 
         it('should return cached data', () => {
