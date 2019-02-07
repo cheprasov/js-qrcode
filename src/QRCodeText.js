@@ -9,8 +9,8 @@ export type OptionsType = ParentOptionsType & {
 }
 
 const DEFAULT_OPTIONS = {
-    blackSymbol: '  ',
-    whiteSymbol: '▓▓',
+    blackSymbol: '▓▓',
+    whiteSymbol: '  ',
 };
 
 export default class QRCodeText extends QRCodeRaw {
