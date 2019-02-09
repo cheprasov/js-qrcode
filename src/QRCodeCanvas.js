@@ -2,6 +2,7 @@
 
 import QRCodeRaw from './QRCodeRaw';
 import type { OptionsType as ParentOptionsType, QRCodeDataType } from './QRCodeRaw';
+import ColorUtils from './utils/ColorUtils';
 
 export type OptionsType = ParentOptionsType & {
     fgColor?: string,
@@ -46,7 +47,7 @@ export default class QRCodeCanvas extends QRCodeRaw {
     _clearCache(): void {
         super._clearCache();
         this.qrCodeDataUrl = null;
-        this.qrCodeCanvas.width = this.qrCodeCanvas.width;
+        this.qrCodeCanvas.width = this.qrCodeCanvas.width; // reset canvas
     }
 
     _getCanvasSize(): ?number {
@@ -63,31 +64,6 @@ export default class QRCodeCanvas extends QRCodeRaw {
         return dataSize;
     }
 
-    _convertHexColorToNumbers(hexColor: string): ?string {
-        const result: Array<number> = [];
-        let hex = hexColor.replace('#', '');
-        switch (hex.length) {
-            case 3:
-                hex += 'F';
-                // Fall through
-            case 4:
-                result.push(...hex.split('').map(h => parseInt(h.repeat(2), 16)));
-                break;
-            case 6:
-                hex += 'FF';
-                // Fall through
-            case 8:
-                result.push(parseInt(hex.substr(0, 2), 16));
-                result.push(parseInt(hex.substr(2, 2), 16));
-                result.push(parseInt(hex.substr(4, 2), 16));
-                result.push(parseInt(hex.substr(6, 2), 16));
-                break;
-            default:
-                return [0, 0, 0, 0];
-        }
-        return result;
-    }
-
     _draw(): ?boolean {
         const dataSize = this.getDataSize();
         if (!dataSize) {
@@ -99,12 +75,12 @@ export default class QRCodeCanvas extends QRCodeRaw {
             return null;
         }
 
-        const fgColor = this._convertHexColorToNumbers(this.fgColor);
-        const bgColor = this._convertHexColorToNumbers(this.bgColor);
+        const fgColor = ColorUtils.convertHexColorToBytes(this.fgColor);
+        const bgColor = ColorUtils.convertHexColorToBytes(this.bgColor);
 
         let index = 0;
         const bytes = new Uint8ClampedArray((dataSize ** 2) * 4);
-        data.forEach((row: Array<boolean>) => {
+        data.forEach((row: boolean[]) => {
             row.forEach((isBlack: boolean) => {
                 if (isBlack) {
                     bytes.set(fgColor, index);
@@ -129,6 +105,10 @@ export default class QRCodeCanvas extends QRCodeRaw {
         this.qrCodeCanvasContext.drawImage(this.canvas, 0, 0, this.qrCodeCanvas.width, this.qrCodeCanvas.height);
 
         return true;
+    }
+
+    getCanvas(): HTMLCanvasElement {
+        return this.qrCodeCanvas;
     }
 
     toDataUrl(type: string = 'image/png', encoderOptions: number = 0.92): ?string {

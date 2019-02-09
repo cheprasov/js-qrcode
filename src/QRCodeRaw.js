@@ -19,7 +19,7 @@ export type OptionsType = {
     errorsEnabled: boolean,
 };
 
-export type QRCodeDataType = Array<Array<boolean>>;
+export type QRCodeDataType = boolean[][];
 
 const DEFAULT_CONSTRUCTOR_PARAMS: OptionsType = {
     level: ERROR_CORRECTION_LEVEL_LOW,
@@ -64,7 +64,7 @@ export default class QRCodeRaw {
         this.qrCodeData = null;
     }
 
-    _getQrCodeData(modules: QRCodeDataType): QRCodeDataType{
+    _getQrCodeData(modules: QRCodeDataType): QRCodeDataType {
         const qrCodeData = [];
 
         const padding = this.padding;
@@ -76,7 +76,7 @@ export default class QRCodeRaw {
         if (padding) {
             qrCodeData.push(...rowsPadding);
         }
-        modules.forEach((row: Array) => {
+        modules.forEach((row: boolean[]) => {
             const qrCodeRow = [];
             qrCodeRow.push(
                 ...columnPadding,

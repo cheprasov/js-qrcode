@@ -10,7 +10,7 @@ export type OptionsType = ParentOptionsType & {
 
 const DEFAULT_OPTIONS = {
     fgColor: '#000',
-    bgColor: '#fff',
+    bgColor: '#FFF',
 };
 
 const TYPE_INT_WHITE = 0;
@@ -60,7 +60,7 @@ export default class QRCodeSVG extends QRCodeRaw {
         if (!data) {
             return null;
         }
-        // copy Array<Array<boolean>> to Array<Array<number>>
+        // copy boolean[][] to number[][]
         return data.map((row) => {
             return row.map((isBlack) => {
                 return isBlack ? TYPE_INT_BLACK : TYPE_INT_WHITE;
@@ -68,13 +68,13 @@ export default class QRCodeSVG extends QRCodeRaw {
         });
     }
 
-    _getRects(): ?Array<RectType> {
+    _getRects(): ?RectType[] {
         const dataInt = this._getDataInt();
         if (!dataInt) {
             return null;
         }
 
-        const rects: Array<RectType> = [];
+        const rects: RectType[] = [];
         const count = dataInt.length - 1;
 
         for (let y = 0; y <= count; y += 1) {
@@ -147,7 +147,7 @@ export default class QRCodeSVG extends QRCodeRaw {
         };
     }
 
-    _buildSVG(size: number, rects: Array<RectType>): string {
+    _buildSVG(size: number, rects: RectType[]): string {
         const tags = [
             `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" shape-rendering="crispEdges" viewBox="0 0 ${size} ${size}">`,
         ];
@@ -174,7 +174,7 @@ export default class QRCodeSVG extends QRCodeRaw {
         return tags.join('');
     }
 
-    toHTML(): ?string {
+    toString(): ?string {
         if (!this.qrCodeHTML) {
             const dataSize = this.getDataSize();
             if (dataSize === 0) {
@@ -207,7 +207,7 @@ export default class QRCodeSVG extends QRCodeRaw {
             return null;
         }
 
-        const relativeRects: Array<RectType> = [];
+        const relativeRects: RectType[] = [];
 
         const rectsMap: Object<string, RectsMapItemType> = {};
         let seqRectId = 0;
