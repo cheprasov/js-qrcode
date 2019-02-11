@@ -83,9 +83,9 @@ export default class QRCodeSVG extends QRCodeRaw {
                 const intType = dataInt[y][x];
                 const isLast = x === count;
                 // will check processed items too
-                const isBlack = intType !== TYPE_INT_WHITE;
+                // const isBlack = intType !== TYPE_INT_WHITE;
                 // or will skip processed items
-                //const isBlack = intType === TYPE_INT_BLACK;
+                const isBlack = intType === TYPE_INT_BLACK;
 
                 if (isBlack && begX === -1) {
                     begX = x;
