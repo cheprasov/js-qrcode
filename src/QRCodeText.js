@@ -38,7 +38,7 @@ export default class QRCodeText extends QRCodeRaw {
         }
 
         const dataSize = this.getDataSize();
-        if (dataSize === 0) {
+        if (!dataSize) {
             return null;
         }
 

@@ -38,7 +38,7 @@ export default class QRCodeSVG extends QRCodeRaw {
 
     fgColor: string;
     bgColor: string;
-    qrCodeHTML: ?string = null;
+    qrCodeSVG: ?string = null;
     qrCodeDataUrl: ?string = null;
 
     constructor(value: string, options: OptionsType = {}) {
@@ -51,7 +51,7 @@ export default class QRCodeSVG extends QRCodeRaw {
 
     _clearCache(): void {
         super._clearCache();
-        this.qrCodeHTML = null;
+        this.qrCodeSVG = null;
         this.qrCodeDataUrl = null;
     }
 
@@ -147,66 +147,11 @@ export default class QRCodeSVG extends QRCodeRaw {
         };
     }
 
-    _buildSVG(size: number, rects: RectType[]): string {
-        const tags = [
-            `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" shape-rendering="crispEdges" viewBox="0 0 ${size} ${size}">`,
-        ];
-
-        if (this.bgColor) {
-            tags.push(`<rect x="0" y="0" height="${size}" width="${size}" fill="${this.bgColor}" />`);
-        }
-
-        rects.forEach((rect: RectType) => {
-            if (rect.width && rect.height) {
-                const rectId = rect.id ? `id="${rect.id}" ` : '';
-                tags.push(
-                    `<rect ${rectId}x="${rect.x}" y="${rect.y}" height="${rect.height}" width="${rect.width}" fill="${this.fgColor}" />`,
-                );
-            } else {
-                tags.push(
-                    `<use xlink:href="#${rect.id}" x="${rect.x}" y="${rect.y}" />`,
-                );
-            }
-            tags.push('\n');
-        });
-
-        tags.push('</svg>');
-        return tags.join('');
-    }
-
-    toString(): ?string {
-        if (!this.qrCodeHTML) {
-            const dataSize = this.getDataSize();
-            if (dataSize === 0) {
-                return null;
-            }
-
-            const rects = this._getRects();
-            if (!rects) {
-                return null;
-            }
-
-            this.qrCodeHTML = this._buildSVG(dataSize, rects);
-        }
-
-        return this.qrCodeHTML;
-    }
-
-    toDataUrl(): ?string {
-        if (this.qrCodeDataUrl) {
-            return this.qrCodeDataUrl;
-        }
-
-        const dataSize = this.getDataSize();
-        if (dataSize === 0) {
-            return null;
-        }
-
+    _getRelativeRects(): ?RectType[] {
         const rects = this._getRects();
         if (!rects) {
             return null;
         }
-
         const relativeRects: RectType[] = [];
 
         const rectsMap: Object<string, RectsMapItemType> = {};
@@ -217,7 +162,7 @@ export default class QRCodeSVG extends QRCodeRaw {
             if (rectsMap[key]) {
                 rectsMap[key].count += 1;
                 if (!rectsMap[key].id) {
-                    rectsMap[key].id = `i${seqRectId}`;
+                    rectsMap[key].id = `i${seqRectId.toString(32)}`;
                     seqRectId += 1;
                 }
             } else {
@@ -243,8 +188,72 @@ export default class QRCodeSVG extends QRCodeRaw {
             }
         });
 
-        const html = this._buildSVG(dataSize, relativeRects);
-        this.qrCodeDataUrl = `data:image/svg+xml;base64,${btoa(html)}`;
+        return relativeRects;
+    }
+
+    _buildSVG(rects: RectType[]): string {
+        const size = this.getDataSize();
+        const tags = [
+            '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" '
+            + `shape-rendering="crispEdges" viewBox="0 0 ${size} ${size}">`,
+        ];
+
+        if (this.bgColor) {
+            tags.push(`<rect x="0" y="0" height="${size}" width="${size}" fill="${this.bgColor}"/>`);
+        }
+
+        rects.forEach((rect: RectType) => {
+            if (rect.width && rect.height) {
+                const rectId = rect.id ? `id="${rect.id}" ` : '';
+                tags.push(
+                    `<rect ${rectId}x="${rect.x}" y="${rect.y}" height="${rect.height}" width="${rect.width}" fill="${this.fgColor}"/>`,
+                );
+            } else {
+                tags.push(
+                    `<use xlink:href="#${rect.id}" x="${rect.x}" y="${rect.y}"/>`,
+                );
+            }
+        });
+
+        tags.push('</svg>');
+        return tags.join('');
+    }
+
+    toString(): ?string {
+        if (!this.qrCodeSVG) {
+            const dataSize = this.getDataSize();
+            if (!dataSize) {
+                return null;
+            }
+
+            const rects = this._getRects();
+            if (!rects) {
+                return null;
+            }
+
+            this.qrCodeSVG = this._buildSVG(rects);
+        }
+
+        return this.qrCodeSVG;
+    }
+
+    toDataUrl(): ?string {
+        if (!this.qrCodeDataUrl) {
+            const dataSize = this.getDataSize();
+            if (!dataSize) {
+                return null;
+            }
+
+            const relativeRects = this._getRelativeRects();
+            if (!relativeRects) {
+                return null;
+            }
+
+            // svg based on relative rects has min 20% less length
+            const svg = this._buildSVG(relativeRects);
+            this.qrCodeDataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
+        }
+
         return this.qrCodeDataUrl;
     }
 
