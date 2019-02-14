@@ -3,10 +3,10 @@
 import QRCodeCore from 'qr.js/lib/QRCode';
 import ErrorCorrectLevel from 'qr.js/lib/ErrorCorrectLevel';
 
-const ERROR_CORRECTION_LEVEL_LOW = 'L'; // Allows recovery of up to 7% data loss
-const ERROR_CORRECTION_LEVEL_MEDIUM = 'M'; // Allows recovery of up to 15% data loss
-const ERROR_CORRECTION_LEVEL_QUARTILE = 'Q'; // Allows recovery of up to 25% data loss
-const ERROR_CORRECTION_LEVEL_HIGH = 'H'; // Allows recovery of up to 30% data loss
+export const ERROR_CORRECTION_LEVEL_LOW = 'L'; // Allows recovery of up to 7% data loss
+export const ERROR_CORRECTION_LEVEL_MEDIUM = 'M'; // Allows recovery of up to 15% data loss
+export const ERROR_CORRECTION_LEVEL_QUARTILE = 'Q'; // Allows recovery of up to 25% data loss
+export const ERROR_CORRECTION_LEVEL_HIGH = 'H'; // Allows recovery of up to 30% data loss
 
 export type ErrorCorrectionLevelType = ERROR_CORRECTION_LEVEL_LOW | ERROR_CORRECTION_LEVEL_MEDIUM
     | ERROR_CORRECTION_LEVEL_QUARTILE | ERROR_CORRECTION_LEVEL_HIGH;

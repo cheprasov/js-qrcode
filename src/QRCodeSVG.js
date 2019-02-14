@@ -2,16 +2,7 @@
 
 import QRCodeRaw from './QRCodeRaw';
 import type { OptionsType as ParentOptionsType } from './QRCodeRaw';
-
-export type OptionsType = ParentOptionsType & {
-    fgColor: string,
-    bgColor?: string,
-}
-
-const DEFAULT_OPTIONS = {
-    fgColor: '#000',
-    bgColor: '#FFF',
-};
+import DimensionUtils from './utils/DimensionUtils';
 
 const TYPE_INT_WHITE = 0;
 const TYPE_INT_BLACK = 1;
@@ -34,12 +25,34 @@ type RectsMapItemType = {
     relative: boolean;
 };
 
+type ImageType = {
+    url: string,
+    width: number|string, // 20 | 20% | auto
+    height: number|string, // 20 | 20% | auto
+    x: number|string, // 20 | 20% | center | left 20% | right 20%
+    y: number|string, // 20 | 20% | center | top 20% | bottom 20%,
+    border: number,
+};
+
+export type OptionsType = ParentOptionsType & {
+    fgColor: string,
+    bgColor?: string,
+    image?: ImageType,
+}
+
+const DEFAULT_OPTIONS = {
+    fgColor: '#000',
+    bgColor: '#FFF',
+    image: null,
+};
+
 export default class QRCodeSVG extends QRCodeRaw {
 
     fgColor: string;
     bgColor: string;
     qrCodeSVG: ?string = null;
     qrCodeDataUrl: ?string = null;
+    imageRect: ?ImageType;
 
     constructor(value: string, options: OptionsType = {}) {
         super(value, options);
@@ -47,12 +60,14 @@ export default class QRCodeSVG extends QRCodeRaw {
 
         this.fgColor = params.fgColor;
         this.bgColor = params.bgColor;
+        this.image = params.image;
     }
 
     _clearCache(): void {
         super._clearCache();
         this.qrCodeSVG = null;
         this.qrCodeDataUrl = null;
+        this.imageRect = null;
     }
 
     _getDataInt(): ?DataIntType {
@@ -191,6 +206,26 @@ export default class QRCodeSVG extends QRCodeRaw {
         return relativeRects;
     }
 
+    _getImageRect(): ?ImageType {
+        if (this.imageRect) {
+            return this.imageRect;
+        }
+        if (!this.image || !this.image.url || !this.image.width || !this.image.height) {
+            return null;
+        }
+        const dataSize = this.getDataSize();
+        if (!dataSize) {
+            return null;
+        }
+        const dataSizeWithoutPadding = dataSize - this.padding * 2;
+        const width = DimensionUtils.calculateDimension(this.image.width, dataSizeWithoutPadding);
+        const height = DimensionUtils.calculateDimension(this.image.height, dataSizeWithoutPadding);
+        const x = DimensionUtils.calculatePosition(this.image.x, width, dataSizeWithoutPadding) + this.padding;
+        const y = DimensionUtils.calculatePosition(this.image.y, height, dataSizeWithoutPadding) + this.padding;
+        this.imageRect = { x, y, width, height, url: this.image.url };
+        return this.imageRect;
+    }
+
     _buildSVG(rects: RectType[]): string {
         const size = this.getDataSize();
         const tags = [
@@ -214,6 +249,19 @@ export default class QRCodeSVG extends QRCodeRaw {
                 );
             }
         });
+
+        const imageRect:ImageType = this._getImageRect();
+        if (imageRect && imageRect.width && imageRect.height) {
+            if (this.bgColor && this.image.border) {
+                const x = imageRect.x - this.image.border;
+                const y = imageRect.y - this.image.border;
+                const width = imageRect.width + this.image.border * 2;
+                const height = imageRect.height + this.image.border * 2;
+                tags.push(`<rect x="${x}" y="${y}" width="${width}" height="${height}" fill="${this.bgColor}"/>`);
+            }
+            //tags.push(`<rect x="${imageRect.x}" y="${imageRect.y}" height="${imageRect.height}" width="${imageRect.width}" fill="red"/>`);
+            tags.push(`<image xlink:href="${imageRect.url}" x="${imageRect.x}" y="${imageRect.y}" width="${imageRect.width}" height="${imageRect.height}"/>`);
+        }
 
         tags.push('</svg>');
         return tags.join('');
