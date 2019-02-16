@@ -16,7 +16,7 @@ const qrcode = new QRCodeSVG(
         level: 'L',
         padding: 0,
         image: {
-            url: dataImage,
+            source: dataImage,
             x: 'center',
             y: 'center',
             width: '40%',
@@ -29,13 +29,14 @@ const qrcode = new QRCodeSVG(
 document.writeln('<img src="' + qrcode.toDataUrl() + '" width="300" />');
 
 const qrc = new QRCodeCanvas(
-    'Alexander Cheprasov',
+    'Alexander Cheprasov kh kjh kjh kjh kjh kjh kjh kjh kjh khj kjh kjh kjh kjh kjh kjh kjh kjh kjh kjh ',
     {
-        level: 'L',
+        level: 'H',
         padding: 0,
         scale: 12,
+        bgColor: '#fffa',
         image: {
-            url: dataImage,
+            source: dataImage,
             x: 'center',
             y: 'center',
             width: '40%',
@@ -45,4 +46,17 @@ const qrc = new QRCodeCanvas(
     },
 );
 
-document.writeln('<img src="' + qrc.toDataUrl() + '" width="300"/>');
+
+document.body.onload = () => {
+    qrc.getCanvas().then((canvas) => {
+        document.body.appendChild(canvas);
+    });
+};
+
+document.body.onload = () => {
+    qrc.toDataUrl().then((dataUrl) => {
+        console.log(dataUrl);
+    });
+};
+
+//document.writeln('<img src="' + qrc.getCanvas() + '" width="300"/>');

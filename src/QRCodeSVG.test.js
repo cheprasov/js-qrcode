@@ -1109,7 +1109,7 @@ describe('QRCodeSVG', () => {
             expect(qrCode._buildSVG).not.toHaveBeenCalled();
         });
 
-        it('should create QR code and return data url', () => {
+        it('should create QR code and return data source', () => {
             const qrCode = new QRCodeSVG('test', {
                 bgColor: '#DDD',
                 fgColor: '#222',
