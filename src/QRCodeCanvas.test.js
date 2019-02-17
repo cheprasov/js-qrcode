@@ -12,7 +12,10 @@ const MockCanvasRenderingContext2D = function () {
     this.imageSmoothingEnabled = true;
 };
 
-HTMLCanvasElement.prototype.getContext = jest.fn(() => new MockCanvasRenderingContext2D());
+HTMLCanvasElement.prototype.getContext = jest.fn(function() {
+    this.mockedContext = new MockCanvasRenderingContext2D();
+    return this.mockedContext;
+});
 
 describe('QRCodeCanvas', () => {
 
@@ -134,7 +137,8 @@ describe('QRCodeCanvas', () => {
                 [true, false, false, false, true],
                 [true, true, true, true, true],
             ]);
-            expect(qrCode._draw()).toEqual(true);
+            const qrCodeCanvas = qrCode._draw();
+            expect(qrCodeCanvas).toBeInstanceOf(HTMLCanvasElement);
             expect(qrCode.canvasContext.putImageData).toHaveBeenCalledTimes(1);
             const putImageDataArgs = qrCode.canvasContext.putImageData.mock.calls[0];
             const imageData = putImageDataArgs[0];
@@ -158,10 +162,10 @@ describe('QRCodeCanvas', () => {
             expect(putImageDataArgs[1]).toEqual(0);
             expect(putImageDataArgs[2]).toEqual(0);
 
-            expect(qrCode.qrCodeCanvasContext.imageSmoothingEnabled).toEqual(false);
-            expect(qrCode.qrCodeCanvas.width).toEqual(40);
-            expect(qrCode.qrCodeCanvas.height).toEqual(40);
-            expect(qrCode.qrCodeCanvasContext.drawImage).toHaveBeenCalledWith(qrCode.canvas, 0, 0, 40, 40);
+            expect(qrCodeCanvas.mockedContext.imageSmoothingEnabled).toEqual(false);
+            expect(qrCodeCanvas.width).toEqual(40);
+            expect(qrCodeCanvas.height).toEqual(40);
+            expect(qrCodeCanvas.mockedContext.drawImage).toHaveBeenCalledWith(qrCode.canvas, 0, 0, 40, 40);
         });
     });
 

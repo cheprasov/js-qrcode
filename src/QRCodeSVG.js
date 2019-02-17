@@ -2,7 +2,7 @@
 
 import type { OptionsType as ParentOptionsType } from './QRCodeRaw';
 import AbstractQRCodeWithImage from './AbstractQRCodeWithImage';
-import type { ImageType } from './AbstractQRCodeWithImage';
+import type { ImageConfigType } from './AbstractQRCodeWithImage';
 
 const TYPE_INT_WHITE = 0;
 const TYPE_INT_BLACK = 1;
@@ -217,16 +217,16 @@ export default class QRCodeSVG extends AbstractQRCodeWithImage {
             }
         });
 
-        const imageRect: ImageType = this._getImageRect();
-        if (imageRect && imageRect.width && imageRect.height) {
-            if (this.bgColor && typeof imageRect.border === 'number') {
-                const x = imageRect.x - imageRect.border;
-                const y = imageRect.y - imageRect.border;
-                const width = imageRect.width + imageRect.border * 2;
-                const height = imageRect.height + imageRect.border * 2;
+        const imageConfig: ImageConfigType = this._getImageRect();
+        if (imageConfig && imageConfig.width && imageConfig.height) {
+            if (this.bgColor && typeof imageConfig.border === 'number') {
+                const x = imageConfig.x - imageConfig.border;
+                const y = imageConfig.y - imageConfig.border;
+                const width = imageConfig.width + imageConfig.border * 2;
+                const height = imageConfig.height + imageConfig.border * 2;
                 tags.push(`<rect x="${x}" y="${y}" width="${width}" height="${height}" fill="${this.bgColor}"/>`);
             }
-            tags.push(`<image xlink:href="${imageRect.source}" x="${imageRect.x}" y="${imageRect.y}" width="${imageRect.width}" height="${imageRect.height}"/>`);
+            tags.push(`<image xlink:href="${imageConfig.source}" x="${imageConfig.x}" y="${imageConfig.y}" width="${imageConfig.width}" height="${imageConfig.height}"/>`);
         }
 
         tags.push('</svg>');

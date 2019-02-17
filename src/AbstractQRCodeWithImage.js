@@ -4,7 +4,7 @@ import QRCodeRaw from './QRCodeRaw';
 import type { OptionsType as ParentOptionsType } from './QRCodeRaw';
 import DimensionUtils from './utils/DimensionUtils';
 
-export type ImageType = {
+export type ImageConfigType = {
     source: string | Image | HTMLCanvasElement | Promise,
     width: number | string, // 20 | 20% | auto
     height: number | string, // 20 | 20% | auto
@@ -14,7 +14,7 @@ export type ImageType = {
 };
 
 export type OptionsType = ParentOptionsType & {
-    image?: ImageType,
+    image?: ImageConfigType,
 }
 
 const DEFAULT_OPTIONS = {
@@ -23,8 +23,8 @@ const DEFAULT_OPTIONS = {
 
 export default class AbstractQRCodeWithImage extends QRCodeRaw {
 
-    image: ?ImageType = null;
-    imageRect: ?ImageType = null;
+    image: ?ImageConfigType = null;
+    imageConfig: ?ImageConfigType = null;
 
     constructor(value: string, options: OptionsType = {}) {
         super(value, options);
@@ -34,10 +34,11 @@ export default class AbstractQRCodeWithImage extends QRCodeRaw {
 
     _clearCache(): void {
         super._clearCache();
-        this.imageRect = null;
+        this.imageConfig = null;
     }
 
-    _getImageSource(source: string | Image | HTMLCanvasElement): ?string {
+    _getImageSource(imageConfig: ImageConfigType): ?string {
+        const source = imageConfig.source;
         if (typeof source === 'string') {
             return source;
         }
@@ -50,9 +51,9 @@ export default class AbstractQRCodeWithImage extends QRCodeRaw {
         return null;
     }
 
-    _getImageRect(): ?ImageType {
-        if (this.imageRect) {
-            return this.imageRect;
+    _getImageRect(): ?ImageConfigType {
+        if (this.imageConfig) {
+            return this.imageConfig;
         }
         if (!this.image || !this.image.source || !this.image.width || !this.image.height) {
             return null;
@@ -61,7 +62,7 @@ export default class AbstractQRCodeWithImage extends QRCodeRaw {
         if (!dataSize) {
             return null;
         }
-        const source = this._getImageSource(this.image.source);
+        const source = this._getImageSource(this.image);
         if (!source) {
             return null;
         }
@@ -73,8 +74,8 @@ export default class AbstractQRCodeWithImage extends QRCodeRaw {
         const y = DimensionUtils.calculatePosition(this.image.y, height, dataSizeWithoutPadding) + this.padding;
         const border = typeof this.image.border === 'number' ? this.image.border : null;
 
-        this.imageRect = { source, border, x, y, width, height };
-        return this.imageRect;
+        this.imageConfig = { source, border, x, y, width, height };
+        return this.imageConfig;
     }
 
 }

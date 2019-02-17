@@ -2,7 +2,7 @@
 
 import type { OptionsType as ParentOptionsType, QRCodeDataType } from './QRCodeRaw';
 import ColorUtils from './utils/ColorUtils';
-import type { ImageType } from './AbstractQRCodeWithImage';
+import type { ImageConfigType } from './AbstractQRCodeWithImage';
 import AbstractQRCodeWithImage from './AbstractQRCodeWithImage';
 import ImageLoader from './loader/ImageLoader';
 
@@ -29,8 +29,6 @@ export default class QRCodeCanvas extends AbstractQRCodeWithImage {
 
     canvas: HTMLCanvasElement;
     canvasContext: CanvasRenderingContext2D;
-    qrCodeCanvas: HTMLCanvasElement;
-    qrCodeCanvasContext: CanvasRenderingContext2D;
 
     constructor(value: string, options: OptionsType = {}) {
         super(value, options);
@@ -43,16 +41,12 @@ export default class QRCodeCanvas extends AbstractQRCodeWithImage {
 
         this.canvas = document.createElement('canvas');
         this.canvasContext = this.canvas.getContext('2d');
-
-        this.qrCodeCanvas = document.createElement('canvas');
-        this.qrCodeCanvas.width = 0;
-        this.qrCodeCanvasContext = this.qrCodeCanvas.getContext('2d');
     }
 
     _clearCache(): void {
         super._clearCache();
         this.qrCodeDataUrl = null;
-        this.qrCodeCanvas.width = 0;
+        this.canvas.width = 0;
     }
 
     _getCanvasSize(): ?number {
@@ -69,7 +63,7 @@ export default class QRCodeCanvas extends AbstractQRCodeWithImage {
         return dataSize;
     }
 
-    _draw(): ?boolean|Promise {
+    _draw(): null | Promise | HTMLCanvasElement {
         const dataSize = this.getDataSize();
         if (!dataSize) {
             return null;
@@ -104,21 +98,31 @@ export default class QRCodeCanvas extends AbstractQRCodeWithImage {
 
         const canvasSize = this._getCanvasSize();
 
-        this.qrCodeCanvas.width = canvasSize;
-        this.qrCodeCanvas.height = canvasSize;
-        this.qrCodeCanvasContext.imageSmoothingEnabled = false;
-        this.qrCodeCanvasContext.drawImage(this.canvas, 0, 0, this.qrCodeCanvas.width, this.qrCodeCanvas.height);
+        const qrCodeCanvas = document.createElement('canvas');
+        qrCodeCanvas.width = canvasSize;
+        qrCodeCanvas.height = canvasSize;
 
-        const drawImageResult = this._drawImage(canvasSize / dataSize, bgColor);
+        const qrCodeCanvasContext = qrCodeCanvas.getContext('2d');
+        qrCodeCanvasContext.imageSmoothingEnabled = false;
+        qrCodeCanvasContext.drawImage(this.canvas, 0, 0, canvasSize, canvasSize);
+
+        const drawImageResult = this._drawImage(qrCodeCanvasContext, canvasSize / dataSize, bgColor);
         if (drawImageResult instanceof Promise) {
-            return drawImageResult;
+            return drawImageResult.then(() => {
+                return qrCodeCanvas;
+            });
         }
-        return true;
+        return qrCodeCanvas;
     }
 
-    _getImageSource(source: string | Image | HTMLCanvasElement): null | Image | HTMLCanvasElement | Promise {
+    _getImageSource(imageConfig: ImageConfigType): null | Image | HTMLCanvasElement | Promise {
+        const source = imageConfig.source;
         if (typeof source === 'string') {
-            return ImageLoader.load(source);
+            return ImageLoader.load(source).then((image: Image) => {
+                this.image.source = image;
+                imageConfig.source = image;
+                return image;
+            });
         }
         if (source instanceof Image) {
             return source;
@@ -129,55 +133,46 @@ export default class QRCodeCanvas extends AbstractQRCodeWithImage {
         return null;
     }
 
-    _drawImage(pixelSize: number, bgColor: number[]): ?Promise {
-        const imageRect: ImageType = this._getImageRect();
-        if (!imageRect) {
+    _drawImage(qrCodeCanvasContext: HTMLCanvasElement, pixelSize: number, bgColor: number[]): ?Promise {
+        const imageConfig: ImageConfigType = this._getImageRect();
+        if (!imageConfig) {
             return null;
         }
-        if (typeof imageRect.border === 'number') {
-            const x = (imageRect.x - imageRect.border) * pixelSize;
-            const y = (imageRect.y - imageRect.border) * pixelSize;
-            const width = (imageRect.width + imageRect.border * 2) * pixelSize;
-            const height = (imageRect.height + imageRect.border * 2) * pixelSize;
-            this.qrCodeCanvasContext.fillStyle = `rgba(${bgColor.slice(0, 3).join(',')},${bgColor[3] / 255})`;
-            this.qrCodeCanvasContext.clearRect(x, y, width, height);
-            this.qrCodeCanvasContext.fillRect(x, y, width, height);
+        if (typeof imageConfig.border === 'number') {
+            const x = (imageConfig.x - imageConfig.border) * pixelSize;
+            const y = (imageConfig.y - imageConfig.border) * pixelSize;
+            const width = (imageConfig.width + imageConfig.border * 2) * pixelSize;
+            const height = (imageConfig.height + imageConfig.border * 2) * pixelSize;
+            qrCodeCanvasContext.fillStyle = `rgba(${bgColor.slice(0, 3).join(',')},${bgColor[3] / 255})`;
+            qrCodeCanvasContext.clearRect(x, y, width, height);
+            qrCodeCanvasContext.fillRect(x, y, width, height);
         }
 
-        if (imageRect.source instanceof Promise) {
-            return imageRect.source.then((image: Image) => {
-                this.qrCodeCanvasContext.drawImage(
+        if (imageConfig.source instanceof Promise) {
+            return imageConfig.source.then((image: Image) => {
+                qrCodeCanvasContext.drawImage(
                     image,
-                    imageRect.x * pixelSize,
-                    imageRect.y * pixelSize,
-                    imageRect.width * pixelSize,
-                    imageRect.height * pixelSize,
+                    imageConfig.x * pixelSize,
+                    imageConfig.y * pixelSize,
+                    imageConfig.width * pixelSize,
+                    imageConfig.height * pixelSize,
                 );
             });
         }
 
-        this.qrCodeCanvasContext.drawImage(
-            imageRect.source,
-            imageRect.x * pixelSize,
-            imageRect.y * pixelSize,
-            imageRect.width * pixelSize,
-            imageRect.height * pixelSize,
+        qrCodeCanvasContext.drawImage(
+            imageConfig.source,
+            imageConfig.x * pixelSize,
+            imageConfig.y * pixelSize,
+            imageConfig.width * pixelSize,
+            imageConfig.height * pixelSize,
         );
 
         return null;
     }
 
-    getCanvas(): HTMLCanvasElement {
-        if (!this.qrCodeCanvas.width) {
-            const result = this._draw();
-            if (!result) {
-                return null;
-            }
-            if (result instanceof Promise) {
-                return result.then(() => this.qrCodeCanvas);
-            }
-        }
-        return this.qrCodeCanvas;
+    getCanvas(): HTMLCanvasElement | Promise | null {
+        return this._draw();
     }
 
     toDataUrl(type: string = 'image/png', encoderOptions: number = 0.92): ?string {
@@ -187,8 +182,8 @@ export default class QRCodeCanvas extends AbstractQRCodeWithImage {
                 return null;
             }
             if (result instanceof Promise) {
-                return result.then(() => {
-                    this.qrCodeDataUrl = this.qrCodeCanvas.toDataURL(type, encoderOptions);
+                return result.then((qrCodeCanvas) => {
+                    this.qrCodeDataUrl = qrCodeCanvas.toDataURL(type, encoderOptions);
                     return this.qrCodeDataUrl;
                 });
             }
