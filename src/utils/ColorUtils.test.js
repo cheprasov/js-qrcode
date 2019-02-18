@@ -3,7 +3,6 @@ import ColorUtils from './ColorUtils';
 describe('ColorUtils', () => {
 
     describe('convertHexColorToBytes', () => {
-
         it('should return empty bytes if hex color has wrong value', () => {
             expect(ColorUtils.convertHexColorToBytes('A')).toEqual([0, 0, 0, 0]);
             expect(ColorUtils.convertHexColorToBytes('red')).toEqual([0, 0, 0, 0]);

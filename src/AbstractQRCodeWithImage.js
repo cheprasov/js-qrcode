@@ -6,8 +6,8 @@ import DimensionUtils from './utils/DimensionUtils';
 
 export type ImageConfigType = {
     source: string | Image | HTMLCanvasElement | Promise,
-    width: number | string, // 20 | 20% | auto
-    height: number | string, // 20 | 20% | auto
+    width: number | string, // 20 | 20%
+    height: number | string, // 20 | 20%
     x: number | string, // 20 | 20% | center | left 20% | right 20%
     y: number | string, // 20 | 20% | center | top 20% | bottom 20%,
     border: ?number,
@@ -51,7 +51,7 @@ export default class AbstractQRCodeWithImage extends QRCodeRaw {
         return null;
     }
 
-    _getImageRect(): ?ImageConfigType {
+    _getImageConfig(): ?ImageConfigType {
         if (this.imageConfig) {
             return this.imageConfig;
         }

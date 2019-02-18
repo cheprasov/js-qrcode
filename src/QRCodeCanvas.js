@@ -134,7 +134,7 @@ export default class QRCodeCanvas extends AbstractQRCodeWithImage {
     }
 
     _drawImage(qrCodeCanvasContext: HTMLCanvasElement, pixelSize: number, bgColor: number[]): ?Promise {
-        const imageConfig: ImageConfigType = this._getImageRect();
+        const imageConfig: ImageConfigType = this._getImageConfig();
         if (!imageConfig) {
             return null;
         }

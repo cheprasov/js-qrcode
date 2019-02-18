@@ -217,7 +217,7 @@ export default class QRCodeSVG extends AbstractQRCodeWithImage {
             }
         });
 
-        const imageConfig: ImageConfigType = this._getImageRect();
+        const imageConfig: ImageConfigType = this._getImageConfig();
         if (imageConfig && imageConfig.width && imageConfig.height) {
             if (this.bgColor && typeof imageConfig.border === 'number') {
                 const x = imageConfig.x - imageConfig.border;

@@ -88,6 +88,110 @@ describe('AbstractQRCodeWithImage', () => {
             expect(qrCode._getImageSource({ source: canvas })).toEqual('data:foo-bar');
             expect(canvas.toDataURL).toHaveBeenCalled();
         });
+
+        it('should return null if source has wrong type', () => {
+            const qrCode = new AbstractQRCodeWithImage('test');
+            expect(qrCode._getImageSource({ source: true })).toEqual(null);
+            expect(qrCode._getImageSource({ source: 42 })).toEqual(null);
+            expect(qrCode._getImageSource({ source: undefined })).toEqual(null);
+            expect(qrCode._getImageSource({ source: null })).toEqual(null);
+        });
+    });
+
+    describe('_getImageConfig', () => {
+        let qrCode;
+
+        beforeEach(() => {
+            qrCode = new AbstractQRCodeWithImage('test', {
+                padding: 0,
+                image: {
+                    source: 'https://someurl.com/img.png',
+                    width: 10,
+                    height: 10,
+                    border: 0,
+                },
+            });
+            qrCode.getDataSize = jest.fn(() => 42);
+        });
+
+        it('should return cached imageConfig', () => {
+            qrCode.imageConfig = { foo: 'bar' };
+            expect(qrCode._getImageConfig()).toEqual({ foo: 'bar' });
+        });
+
+        it('should return null if image is not provided', () => {
+            qrCode.image = null;
+            expect(qrCode._getImageConfig()).toBeNull();
+        });
+
+        it('should return null if image.source is not provided', () => {
+            qrCode.image.source = null;
+            expect(qrCode._getImageConfig()).toBeNull();
+        });
+
+        it('should return null if image.width is not provided', () => {
+            qrCode.image.width = null;
+            expect(qrCode._getImageConfig()).toBeNull();
+        });
+
+        it('should return null if image.height is not provided', () => {
+            qrCode.image.height = null;
+            expect(qrCode._getImageConfig()).toBeNull();
+        });
+
+        it('should return null if dataSize is empty', () => {
+            qrCode.getDataSize = jest.fn(() => 0);
+            expect(qrCode._getImageConfig()).toBeNull();
+        });
+
+        it('should return imageConfig if dataSize is empty', () => {
+            expect(qrCode._getImageConfig()).toEqual({
+                source: 'https://someurl.com/img.png',
+                border: 0,
+                width: 10,
+                height: 10,
+                x: 0,
+                y: 0,
+            });
+        });
+
+        it('should return increase X & Y on padding size', () => {
+            qrCode.padding = 4;
+            expect(qrCode._getImageConfig()).toEqual({
+                source: 'https://someurl.com/img.png',
+                border: 0,
+                width: 10,
+                height: 10,
+                x: 4,
+                y: 4,
+            });
+
+            qrCode.imageConfig = null;
+            qrCode.image.x = 'right';
+            qrCode.image.y = 'center';
+            expect(qrCode._getImageConfig()).toEqual({
+                source: 'https://someurl.com/img.png',
+                border: 0,
+                width: 10,
+                height: 10,
+                x: 28,
+                y: 16,
+            });
+        });
+
+        it('should calculate width and height without padding', () => {
+            qrCode.padding = 5;
+            qrCode.image.width = '100%';
+            qrCode.image.height = '50%';
+            expect(qrCode._getImageConfig()).toEqual({
+                source: 'https://someurl.com/img.png',
+                border: 0,
+                width: 32,
+                height: 16,
+                x: 5,
+                y: 5,
+            });
+        });
     });
 
 });

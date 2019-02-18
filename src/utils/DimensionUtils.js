@@ -1,12 +1,11 @@
 
-
 export default class DimensionUtils {
 
     static calculateDimension(value: string | number, canvasSize: number): number {
         if (typeof value === 'number') {
             return value;
         }
-        if (typeof value === 'string' && value.indexOf('%') !== -1) {
+        if (typeof value === 'string' && value.indexOf('%') > 0) {
             return Math.round(parseFloat(value) / 100 * canvasSize) || 0;
         }
         return parseFloat(value) || 0;
