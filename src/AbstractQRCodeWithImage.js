@@ -1,7 +1,7 @@
 // @flow
 
 import QRCodeRaw from './QRCodeRaw';
-import type { OptionsType as ParentOptionsType } from './QRCodeRaw';
+import type { OptionsType as ParentOptionsType, QRCodeDataType } from './QRCodeRaw';
 import DimensionUtils from './utils/DimensionUtils';
 
 export type ImageConfigType = {
@@ -76,6 +76,34 @@ export default class AbstractQRCodeWithImage extends QRCodeRaw {
 
         this.imageConfig = { source, border, x, y, width, height };
         return this.imageConfig;
+    }
+
+    getData(): ?QRCodeDataType {
+        if (this.qrCodeData) {
+            return this.qrCodeData;
+        }
+
+        const data = super.getData();
+        if (!data) {
+            return data;
+        }
+
+        const imageConfig: ImageConfigType = this._getImageConfig();
+        if (imageConfig && imageConfig.width && imageConfig.height) {
+            if (typeof imageConfig.border === 'number') {
+                const begX = Math.max(imageConfig.x - imageConfig.border, 0);
+                const begY = Math.max(imageConfig.y - imageConfig.border, 0);
+                const endX = Math.min(begX + imageConfig.width + imageConfig.border * 2, data.length);
+                const endY = Math.min(begY + imageConfig.height + imageConfig.border * 2, data.length);
+                for (let y = begY; y < endY; y += 1) {
+                    for (let x = begX; x < endX; x += 1) {
+                        data[y][x] = this.invert ? true : false;
+                    }
+                }
+            }
+        }
+
+        return data;
     }
 
 }

@@ -14,18 +14,20 @@ const qrcode = new QRCodeSVG(
     'Alexander Cheprasov',
     {
         level: 'H',
-        padding: 0,
+        padding: 10,
+        bgColor: 'rgba(255, 0, 0, 0.2)',
         image: {
             source: dataImage,
-            x: 'center',
-            y: 'center',
+            x: 'right',
+            y: 'bottom',
             width: '40%',
             height: '40%',
-            border: 1,
+            border: 12,
         },
     },
 );
 
+document.writeln(qrcode.toString());
 document.writeln('<img src="' + qrcode.toDataUrl() + '" width="300" />');
 
 const qrc = new QRCodeCanvas(

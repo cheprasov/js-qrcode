@@ -817,6 +817,31 @@ describe('QRCodeSVG', () => {
             );
         });
 
+        it('should draw image if it is provided', () => {
+            const qrCode = new QRCodeSVG('test', {
+                image: {
+                    source: 'https://some-url.com/test.png',
+                    width: '10%',
+                    height: 20,
+                    x: 'center',
+                    y: 'bottom',
+                    border: '2',
+                },
+            });
+            qrCode.getDataSize = jest.fn(() => 42);
+            expect(qrCode._buildSVG([
+                { x: 1, y: 1, width: 7, height: 1, id: 'i0' },
+                { x: 9, y: 1, width: 2, height: 1, id: 'i5' },
+            ])).toEqual(
+                '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" '
+                + 'shape-rendering="crispEdges" viewBox="0 0 42 42">'
+                + '<rect x="0" y="0" height="42" width="42" fill="#FFF"/>'
+                + '<rect id="i0" x="1" y="1" height="1" width="7" fill="#000"/>'
+                + '<rect id="i5" x="9" y="1" height="1" width="2" fill="#000"/>'
+                + '<image xlink:href="https://some-url.com/test.png" x="19" y="21" width="4" height="20"/>'
+                + '</svg>',
+            );
+        });
 
         it('should build svg by relative rects', () => {
             const qrCode = new QRCodeSVG('test');
@@ -1092,7 +1117,6 @@ describe('QRCodeSVG', () => {
             );
         });
     });
-
 
     describe('toDataUrl', () => {
         it('should return null if data are empty', () => {

@@ -1,5 +1,13 @@
 import AbstractQRCodeWithImage from './AbstractQRCodeWithImage';
 
+let mockQRCode;
+
+jest.mock('qr.js/lib/QRCode', () => {
+    return function () {
+        Object.assign(this, mockQRCode);
+    };
+});
+
 describe('AbstractQRCodeWithImage', () => {
 
     describe('constructor', () => {
@@ -191,6 +199,200 @@ describe('AbstractQRCodeWithImage', () => {
                 x: 5,
                 y: 5,
             });
+        });
+    });
+
+    describe('getData', () => {
+        beforeEach(() => {
+            mockQRCode = {
+                addData: jest.fn(),
+                make: jest.fn(),
+                modules: [
+                    [true, true, true, true, true],
+                    [true, false, false, false, true],
+                    [true, false, true, false, true],
+                    [true, false, false, false, true],
+                    [true, true, true, true, true],
+                ],
+            };
+        });
+
+        it('should not change data if image is not provided', () => {
+            const qrCode = new AbstractQRCodeWithImage('test');
+            expect(qrCode.getData()).toEqual([
+                [false, false, false, false, false, false, false],
+                [false, true, true, true, true, true, false],
+                [false, true, false, false, false, true, false],
+                [false, true, false, true, false, true, false],
+                [false, true, false, false, false, true, false],
+                [false, true, true, true, true, true, false],
+                [false, false, false, false, false, false, false],
+            ]);
+        });
+
+        it('should not change data if image.border is not number', () => {
+            const qrCode = new AbstractQRCodeWithImage('test', {
+                image: {
+                    source: 'foo.png',
+                    x: 'center',
+                    y: 'center',
+                    width: 5,
+                    height: 5,
+                    border: null,
+                },
+            });
+            expect(qrCode.getData()).toEqual([
+                [false, false, false, false, false, false, false],
+                [false, true, true, true, true, true, false],
+                [false, true, false, false, false, true, false],
+                [false, true, false, true, false, true, false],
+                [false, true, false, false, false, true, false],
+                [false, true, true, true, true, true, false],
+                [false, false, false, false, false, false, false],
+            ]);
+        });
+
+        it('should remove data under image if image.border is 0', () => {
+            const qrCode = new AbstractQRCodeWithImage('test', {
+                image: {
+                    source: 'foo.png',
+                    x: 'right',
+                    y: 'bottom',
+                    width: 3,
+                    height: 2,
+                    border: 0,
+                },
+            });
+            expect(qrCode.getData()).toEqual([
+                [false, false, false, false, false, false, false],
+                [false, true, true, true, true, true, false],
+                [false, true, false, false, false, true, false],
+                [false, true, false, true, false, true, false],
+                [false, true, false, false, false, false, false],
+                [false, true, true, false, false, false, false],
+                [false, false, false, false, false, false, false],
+            ]);
+            expect(qrCode.imageConfig).toEqual({
+                source: 'foo.png',
+                x: 3,
+                y: 4,
+                width: 3,
+                height: 2,
+                border: 0,
+            });
+        });
+
+        it('should remove data under image and border if image.border is greater than 0', () => {
+            const qrCode = new AbstractQRCodeWithImage('test', {
+                image: {
+                    source: 'foo.png',
+                    x: 'right',
+                    y: 'bottom',
+                    width: 3,
+                    height: 2,
+                    border: 1,
+                },
+            });
+            expect(qrCode.getData()).toEqual([
+                [false, false, false, false, false, false, false],
+                [false, true, true, true, true, true, false],
+                [false, true, false, false, false, true, false],
+                [false, true, false, false, false, false, false],
+                [false, true, false, false, false, false, false],
+                [false, true, false, false, false, false, false],
+                [false, false, false, false, false, false, false],
+            ]);
+            expect(qrCode.imageConfig).toEqual({
+                source: 'foo.png',
+                x: 3,
+                y: 4,
+                width: 3,
+                height: 2,
+                border: 1,
+            });
+        });
+
+        it('should remove data under image and min border if image.border is less than 0', () => {
+            const qrCode = new AbstractQRCodeWithImage('test', {
+                image: {
+                    source: 'foo.png',
+                    x: 'center',
+                    y: 'center',
+                    width: 5,
+                    height: 5,
+                    border: -1,
+                },
+            });
+            expect(qrCode.getData()).toEqual([
+                [false, false, false, false, false, false, false],
+                [false, true, true, true, true, true, false],
+                [false, true, false, false, false, true, false],
+                [false, true, false, false, false, true, false],
+                [false, true, false, false, false, true, false],
+                [false, true, true, true, true, true, false],
+                [false, false, false, false, false, false, false],
+            ]);
+            expect(qrCode.imageConfig).toEqual({
+                source: 'foo.png',
+                x: 1,
+                y: 1,
+                width: 5,
+                height: 5,
+                border: -1,
+            });
+        });
+
+        it('should calculate well inverted data', () => {
+            const qrCode = new AbstractQRCodeWithImage('test', {
+                invert: true,
+                image: {
+                    source: 'foo.png',
+                    x: 'right',
+                    y: 'bottom',
+                    width: 3,
+                    height: 2,
+                    border: 0,
+                },
+            });
+            expect(qrCode.getData()).toEqual([
+                [true, true, true, true, true, true, true],
+                [true, false, false, false, false, false, true],
+                [true, false, true, true, true, false, true],
+                [true, false, true, false, true, false, true],
+                [true, false, true, true, true, true, true],
+                [true, false, false, true, true, true, true],
+                [true, true, true, true, true, true, true],
+            ]);
+            expect(qrCode.imageConfig).toEqual({
+                source: 'foo.png',
+                x: 3,
+                y: 4,
+                width: 3,
+                height: 2,
+                border: 0,
+            });
+        });
+
+        it('should calculate well large border', () => {
+            const qrCode = new AbstractQRCodeWithImage('test', {
+                image: {
+                    source: 'foo.png',
+                    x: 'center',
+                    y: 'center',
+                    width: 1,
+                    height: 1,
+                    border: 100,
+                },
+            });
+            expect(qrCode.getData()).toEqual([
+                [false, false, false, false, false, false, false],
+                [false, false, false, false, false, false, false],
+                [false, false, false, false, false, false, false],
+                [false, false, false, false, false, false, false],
+                [false, false, false, false, false, false, false],
+                [false, false, false, false, false, false, false],
+                [false, false, false, false, false, false, false],
+            ]);
         });
     });
 
