@@ -71,6 +71,11 @@ describe('QRCodeSVG', () => {
             expect(qrCode.fgColor).toEqual('#AAA');
             expect(qrCode.bgColor).toEqual('#FFF');
         });
+
+        it('should create alias toDataURL for method toDataUrl', () => {
+            const qrCode = new QRCodeSVG('test');
+            expect(qrCode.toDataURL).toBe(qrCode.toDataUrl);
+        });
     });
 
     describe('_clearCache', () => {

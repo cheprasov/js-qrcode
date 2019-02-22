@@ -74,16 +74,19 @@ describe('QRCodeCanvas', () => {
             expect(qrCode.scale).toEqual(11);
             expect(qrCode.size).toEqual(100);
         });
+
+        it('should create alias toDataURL for method toDataUrl', () => {
+            const qrCode = new QRCodeCanvas('test');
+            expect(qrCode.toDataURL).toBe(qrCode.toDataUrl);
+        });
     });
 
     describe('_clearCache', () => {
         it('should clear qrCodeData and qrCodeText', () => {
             const qrCode = new QRCodeCanvas('test');
             qrCode.qrCodeData = [1, 2, 3, 4];
-            qrCode.qrCodeDataUrl = 'data:some-42';
             qrCode._clearCache();
             expect(qrCode.qrCodeData).toBeNull();
-            expect(qrCode.qrCodeDataUrl).toBeNull();
         });
     });
 
@@ -112,6 +115,102 @@ describe('QRCodeCanvas', () => {
             const qrCode = new QRCodeCanvas('test', { scale: 0 });
             qrCode.getDataSize = jest.fn(() => 21);
             expect(qrCode._getCanvasSize()).toEqual(21);
+        });
+    });
+
+    describe('_getImageSource', () => {
+        it('should return promise if string is passed', () => {
+            const qrCode = new QRCodeCanvas('test');
+            expect(qrCode._getImageSource({ source: 'foo-bar.png' })).toBeInstanceOf(Promise);
+        });
+
+        it('should return Image if Image is passed', () => {
+            const qrCode = new QRCodeCanvas('test');
+            const img = new Image();
+            img.src = 'https://some-url.com/foo.png';
+            expect(qrCode._getImageSource({ source: img })).toEqual(img);
+        });
+
+        it('should return Canvas if Canvas is passed', () => {
+            const qrCode = new QRCodeCanvas('test');
+            const canvas = document.createElement('canvas');
+            expect(qrCode._getImageSource({ source: canvas })).toEqual(canvas);
+        });
+
+        it('should return null if source has wrong type', () => {
+            const qrCode = new QRCodeCanvas('test');
+            expect(qrCode._getImageSource({ source: true })).toEqual(null);
+            expect(qrCode._getImageSource({ source: 42 })).toEqual(null);
+            expect(qrCode._getImageSource({ source: undefined })).toEqual(null);
+            expect(qrCode._getImageSource({ source: null })).toEqual(null);
+        });
+    });
+
+    describe('_drawImage', () => {
+        let qrCode;
+        let imageConfig;
+        let qrCodeCanvasContext = {
+            drawImage: jest.fn(),
+        };
+        let pixelSize = 10;
+
+        beforeEach(() => {
+            qrCode = new QRCodeCanvas('test');
+            imageConfig = {
+                source: new Image(),
+                width: 10,
+                height: 12,
+                x: 1,
+                y: 2,
+                border: null,
+            };
+            qrCode._getImageConfig = jest.fn(() => imageConfig);
+        });
+
+        it('should return null if imageConfig is not provided', () => {
+            imageConfig = null;
+            expect(qrCode._drawImage(qrCodeCanvasContext, pixelSize)).toBeNull();
+        });
+
+        it('should return promise if source is a promise', () => {
+            const img = new Image();
+            const promise = Promise.resolve(img);
+            imageConfig.source = promise;
+            expect(qrCode._drawImage(qrCodeCanvasContext, pixelSize)).toEqual(promise);
+            expect(qrCodeCanvasContext.drawImage).not.toHaveBeenCalled();
+            return promise.then(() => {
+                expect(qrCodeCanvasContext.drawImage).toHaveBeenCalledWith(img, 10, 20, 100, 120);
+            });
+        });
+
+        it('should return true if source is an Image', () => {
+            const img = new Image();
+            imageConfig.source = img;
+            expect(qrCode._drawImage(qrCodeCanvasContext, pixelSize)).toEqual(true);
+            expect(qrCodeCanvasContext.drawImage).toHaveBeenCalledWith(img, 10, 20, 100, 120);
+        });
+
+        it('should return true if source is a canvas', () => {
+            const canvas = document.createElement('canvas');
+            imageConfig.source = canvas;
+            expect(qrCode._drawImage(qrCodeCanvasContext, pixelSize)).toEqual(true);
+            expect(qrCodeCanvasContext.drawImage).toHaveBeenCalledWith(canvas, 10, 20, 100, 120);
+        });
+    });
+
+    describe('getCanvas', () => {
+        it('should return result of call _draw()', () => {
+            const qrCode = new QRCodeCanvas('test');
+
+            qrCode._draw = jest.fn(() => null);
+            expect(qrCode.getCanvas()).toBeNull();
+
+            const canvas = document.createElement('canvas');
+            qrCode._draw = jest.fn(() => canvas);
+            expect(qrCode.getCanvas()).toBe(canvas);
+
+            qrCode._draw = jest.fn(() => Promise.resolve(canvas));
+            expect(qrCode.getCanvas()).toBeInstanceOf(Promise);
         });
     });
 
@@ -166,6 +265,37 @@ describe('QRCodeCanvas', () => {
             expect(qrCodeCanvas.width).toEqual(40);
             expect(qrCodeCanvas.height).toEqual(40);
             expect(qrCodeCanvas.mockedContext.drawImage).toHaveBeenCalledWith(qrCode.canvas, 0, 0, 40, 40);
+        });
+    });
+
+    describe('toDataURL', () => {
+        let canvas;
+
+        beforeEach(() => {
+            HTMLCanvasElement.prototype.toDataURL = jest.fn(() => 'data:url');
+            canvas = document.createElement('canvas');
+        });
+
+        it('should return null if canvas is not drawn', () => {
+            const qrCode = new QRCodeCanvas('test');
+            qrCode._draw = jest.fn(() => null);
+            expect(qrCode.toDataUrl()).toBeNull();
+        });
+
+        it('should return promise if _draws returns a promise', () => {
+            const qrCode = new QRCodeCanvas('test');
+            qrCode._draw = jest.fn(() => Promise.resolve(canvas));
+            const result = qrCode.toDataUrl();
+            expect(result).toBeInstanceOf(Promise);
+            return result.then((url) => {
+                expect(url).toEqual('data:url');
+            });
+        });
+
+        it('should return string if _draws returns a canvas', () => {
+            const qrCode = new QRCodeCanvas('test');
+            qrCode._draw = jest.fn(() => canvas);
+            expect(qrCode.toDataUrl()).toEqual('data:url');
         });
     });
 

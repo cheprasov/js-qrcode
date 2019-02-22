@@ -49,6 +49,8 @@ export default class QRCodeSVG extends AbstractQRCodeWithImage {
 
         this.fgColor = params.fgColor;
         this.bgColor = params.bgColor;
+
+        this.toDataURL = this.toDataUrl;
     }
 
     _clearCache(): void {

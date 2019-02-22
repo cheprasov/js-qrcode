@@ -41,11 +41,12 @@ export default class QRCodeCanvas extends AbstractQRCodeWithImage {
 
         this.canvas = document.createElement('canvas');
         this.canvasContext = this.canvas.getContext('2d');
+
+        this.toDataURL = this.toDataUrl;
     }
 
     _clearCache(): void {
         super._clearCache();
-        this.qrCodeDataUrl = null;
         this.canvas.width = 0;
     }
 
@@ -133,7 +134,7 @@ export default class QRCodeCanvas extends AbstractQRCodeWithImage {
         return null;
     }
 
-    _drawImage(qrCodeCanvasContext: HTMLCanvasElement, pixelSize: number): ?Promise {
+    _drawImage(qrCodeCanvasContext: HTMLCanvasElement, pixelSize: number): null | true | Promise {
         const imageConfig: ImageConfigType = this._getImageConfig();
         if (!imageConfig) {
             return null;
@@ -159,7 +160,7 @@ export default class QRCodeCanvas extends AbstractQRCodeWithImage {
             imageConfig.height * pixelSize,
         );
 
-        return null;
+        return true;
     }
 
     getCanvas(): HTMLCanvasElement | Promise | null {
@@ -167,19 +168,15 @@ export default class QRCodeCanvas extends AbstractQRCodeWithImage {
     }
 
     toDataUrl(type: string = 'image/png', encoderOptions: number = 0.92): ?string {
-        if (!this.qrCodeDataUrl) {
-            const result = this._draw();
-            if (!result) {
-                return null;
-            }
-            if (result instanceof Promise) {
-                return result.then((qrCodeCanvas) => {
-                    this.qrCodeDataUrl = qrCodeCanvas.toDataURL(type, encoderOptions);
-                    return this.qrCodeDataUrl;
-                });
-            }
+        const canvasOrPromise = this._draw();
+        if (!canvasOrPromise) {
+            return null;
         }
-        return this.qrCodeDataUrl;
+        if (canvasOrPromise instanceof Promise) {
+            return canvasOrPromise.then((qrCodeCanvas) => {
+                return qrCodeCanvas.toDataURL(type, encoderOptions);
+            });
+        }
+        return canvasOrPromise.toDataURL(type, encoderOptions);
     }
-
 }
