@@ -44,21 +44,27 @@ import { QRCodeRaw, QRCodeSVG, QRCodeCanvas, QRCodeText } from '@cheprasov/qrcod
 
 ### 2. Quick examples
 
+Create SVG QR Code
 ```javascript
-import { QRCodeSVG, QRCodeCanvas } from '@cheprasov/qrcode';
-
-const qrCanvas = new QRCodeCanvas('some value for QR code');
-const dataUrlWithQRCode = qrCanvas.toDataUrl();
-const canvasWithQRCode = qrCanvas.getCanvas();
+import { QRCodeSVG } from '@cheprasov/qrcode';
 
 const qrSVG = new QRCodeSVG('some value for QR code');
 const dataUrlWithSVGQRCode = qrSVG.toDataUrl();
 const xmlWithQRCode = qrSVG.toString();
 ```
 
+Create Image QR Code
+```javascript
+import { QRCodeCanvas } from '@cheprasov/qrcode';
+
+const qrCanvas = new QRCodeCanvas('some value for QR code');
+const dataUrlWithQRCode = qrCanvas.toDataUrl();
+const canvasWithQRCode = qrCanvas.getCanvas();
+```
+
 ### 3. Documentation
 
-#### 3.1 class QRCodeRaw
+#### 3.1. class `QRCodeRaw`
 
 The class base class for all QR code generators, returns raw data with information about QR blocks and padding.
 
@@ -74,12 +80,12 @@ Create new instance of QRCodeRaw
 Params:
 - `value` (string) - new value for encoding to QR code
 - `config` (object, optional) - parameters of configuration
-    - `level` (string, default = `L`) - error correction level, allowed values:
+    - `level` (string, default = `L`) - error correction level. Note, the level affects QR Code data size. Allowed values:
         - `L` - Allows recovery of up to 7% data loss
         - `M` - Allows recovery of up to 15% data loss
         - `Q` - Allows recovery of up to 25% data loss
         - `H` - Allows recovery of up to 30% data loss
-        Note, the level affects QR Code data size.
+
     - `typeNumber` (number, default = `0`) - data capacity type, see details in appendix 4.1. Type number (`1` ~ `40`), or `0` for auto detection.
     - `invert` (boolean, default = `false`) - inverting data of QR code.
     - `padding` (number, default = `1`) - count of white spaces on sides QR code. 1 unit has size like 1 information block.
@@ -87,6 +93,7 @@ Params:
 
 #### `setValue(value: string): void`
 Set new value for encoding to QR code
+
 Params:
 - `value` (string) - new value for encoding to QR code
 
@@ -120,9 +127,18 @@ if (qrCodeRaw) {
 }
 ```
 
-### 4 Appendix
+#### 3.2. class `QRCodeCanvas`
+...
 
-#### 4.1 Data capacity in bytes
+#### 3.3. class `QRCodeSVG`
+...
+
+#### 3.4. class `QRCodeText`
+...
+
+### 4. Appendix
+
+#### 4.1. Data capacity in bytes
 
 <table>
     <thead>
