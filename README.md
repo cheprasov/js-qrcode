@@ -8,7 +8,6 @@ The library is for generating QR codes using SVG, HTML5 canvas, text, PNG and JP
 #### Features:
 - Easy to use and configure (error correction level, type number, padding and so on).
 - Supports inverting of data.
--
 
 - SVG
     - Returns generated QR code as SVG (xml) or DataURL.
@@ -229,10 +228,103 @@ promise.then((dataUrl) => {
     console.log(dataUrl); // data:image/png;base64,iVBORw0KGgoAAAAN...
 });
 ```
-...
 
 #### 3.3. class `QRCodeSVG`
-...
+
+The class creates QR code as SVG in string or data url formats.
+The class extends `QRCodeRaw`, therefore please see there description about public method and configuration params.
+
+```javascript
+import { QRCodeSVG } from '@cheprasov/qrcode';
+```
+
+Public methods:
+
+#### `constructor(value: string, config: object)`
+Create new instance of QRCodeSVG. Please see config description of `QRCodeRaw.constructor`.
+
+Config has additional parameters:
+- `config` (object, optional) - parameters of configuration
+    - (see config of `QRCodeRaw.constructor`).
+    - `fgColor` (string, optional, default = `#000`) - foreground color of the QR code in CSS format
+    - `bgColor` (string, optional, default = `#FFF`) - background color of the QR code in CSS format
+    - `image` (object, optional, default = `null`) - parameters on an image, that should be added to QR code, like logo.
+        - `source` (string|Image|Canvas) - source of image for QR Code, allowed to use the next types:
+            - `string` - url to resource or dataUrl of image.
+            - `Image` - it is allowed to use Image. It is not necessary to have loaded image.
+            - `Canvas` - allowed to use HTML5 canvas element.
+        - `width` (number|string) - width of the image in QR code dots (not a pixel), allowed formats:
+            - `<number>` - defines the width of image, example: `width: 30`
+            - `<number>%` - defines the width in percent of QR code without padding, example: `width: '20%'`
+            - `height` (number|string) - height of the image in QR code dots, see `width`
+        - `x` (number|string, optional, default = `0`) - position of image on QR code by horizontal in QR code dots (not a pixel), allowed formats:
+            - `<number>` - sets the left edge position from left to right, example: `x: 10`
+            - `<number>%` - sets the left edge position in % of QR code without padding. Negative values are allowed. Example: `x: '50%'`
+            - `left` -  aligns the image to the left, example: `x: 'left'`
+            - `right` -  aligns the image to the right, example: `x: 'right'`
+            - `center` - Centers the image in center of QR code,  example: `x: 'center'`
+            - `left <number>` - the same as `<number>`
+            - `left <number> %` - the same as `<number>%`
+            - `right <number>` - sets the right edge position from right to left, example: `x: 'right 5'`
+            - `right <number>%` - sets the tight edge position in % of QR code without padding, example: `x: 'right 10%'`
+        - `y` (number|string, optional, default = `0`) - position of image on QR code by vertical in QR code dots (not a pixel), allowed formats:
+            - `<number>` - sets the top edge position from top to bottom, example: `y: 10`
+            - `<number>%` - sets the top edge position in % of QR code without padding. Negative values are allowed. Example: `y: '50%'`
+            - `top` -  aligns the image to the top, example: `y: 'top'`
+            - `bottom` -  aligns the image to the bottom, example: `y: 'bottom'`
+            - `center` - Centers the image in center of QR code,  example: `y: 'center'`
+            - `top <number>` - the same as `<number>`
+            - `top <number> %` - the same as `<number>%`
+            - `bottom <number>` - sets the bottom edge position from bottom to top, example: `y: 'bottom 5'`
+            - `bottom <number>%` - sets the bottom edge position in % of QR code without padding, example: `y: 'bottom 10%'`
+        - `border` (number|null, optional, default = 1) - white space length around the images in dots. Negative values are allowed.
+            - use `0` - for white space only under the image
+            - use `null` to remove any white spaces under image and leave QR data dots
+
+#### `toString(): null | string`
+Returns SVG with QR code as string. If QR code can not be generated then `null` will be returned.
+
+#### `toDataUrl(): null | string`
+Allowed alias: `toDataURL(...)`
+Returns SVG with QR code as dataUrl (string). If QR code can not be generated then `null` will be returned.
+
+Example
+```javascript
+import { QRCodeSVG } from '@cheprasov/qrcode';
+
+const qrSVG = new QRCodeSVG('some value');
+const dataUrl = qrSVG.toDataUrl();
+console.log(dataUrl); // data:image/png;base64,iVBORw0KGgoAAAA...g==
+```
+
+Example with image
+```javascript
+import { QRCodeSVG } from '@cheprasov/qrcode';
+
+const config = {
+    level: 'M', // use high error correction level
+    padding: 0, // do not use padding around qr code data,
+    image: {
+        source: 'https://some-url.com/foo.png', // or data:image/jpeg;base64,...
+        width: '10%',
+        height: '10%',
+        x: 'center',
+        y: 'center',
+    }
+};
+
+const qrSVG = new QRCodeSVG('some value', config);
+const svg = qrSVG.toString();
+console.log(svg);
+// output:
+// <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" shape-rendering="crispEdges" viewBox="0 0 21 21">
+// <rect x="0" y="0" height="21" width="21" fill="#FFF"/>
+// <rect x="0" y="0" height="1" width="7" fill="#000"/>
+// <rect x="9" y="0" height="1" width="2" fill="#000"/>
+// ...
+// <image xlink:href="https://some-url.com/foo.png" x="10" y="10" width="2" height="2"/>
+// </svg>
+```
 
 #### 3.4. class `QRCodeText`
 ...

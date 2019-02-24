@@ -33,7 +33,6 @@ export type OptionsType = ParentOptionsType & {
 const DEFAULT_OPTIONS = {
     fgColor: '#000',
     bgColor: '#FFF',
-    image: null,
 };
 
 export default class QRCodeSVG extends AbstractQRCodeWithImage {
@@ -228,7 +227,7 @@ export default class QRCodeSVG extends AbstractQRCodeWithImage {
         return tags.join('');
     }
 
-    toString(): ?string {
+    toString(): null | string {
         if (!this.qrCodeSVG) {
             const dataSize = this.getDataSize();
             if (!dataSize) {
@@ -246,7 +245,7 @@ export default class QRCodeSVG extends AbstractQRCodeWithImage {
         return this.qrCodeSVG;
     }
 
-    toDataUrl(): ?string {
+    toDataUrl(): null | string {
         if (!this.qrCodeDataUrl) {
             const dataSize = this.getDataSize();
             if (!dataSize) {
