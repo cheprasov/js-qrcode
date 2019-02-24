@@ -10,7 +10,7 @@ export type OptionsType = ParentOptionsType & {
     fgColor?: string,
     bgColor?: ?string,
     scale?: number,
-    width?: number,
+    size?: number,
 }
 
 const DEFAULT_OPTIONS = {
@@ -163,11 +163,11 @@ export default class QRCodeCanvas extends AbstractQRCodeWithImage {
         return true;
     }
 
-    getCanvas(): HTMLCanvasElement | Promise | null {
+    getCanvas(): null | HTMLCanvasElement | Promise {
         return this._draw();
     }
 
-    toDataUrl(type: string = 'image/png', encoderOptions: number = 0.92): ?string {
+    toDataUrl(type: string = 'image/png', encoderOptions: number = 0.92): null | string | Promise {
         const canvasOrPromise = this._draw();
         if (!canvasOrPromise) {
             return null;

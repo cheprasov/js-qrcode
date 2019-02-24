@@ -66,7 +66,7 @@ const canvasWithQRCode = qrCanvas.getCanvas();
 
 #### 3.1. class `QRCodeRaw`
 
-The class base class for all QR code generators, returns raw data with information about QR blocks and padding.
+The class base class for all QR code generators, returns raw data with information about QR dots and padding.
 
 ```javascript
 import { QRCodeRaw } from '@cheprasov/qrcode';
@@ -80,16 +80,16 @@ Create new instance of QRCodeRaw
 Params:
 - `value` (string) - new value for encoding to QR code
 - `config` (object, optional) - parameters of configuration
-    - `level` (string, default = `L`) - error correction level. Note, the level affects QR Code data size. Allowed values:
+    - `level` (string, optional, default = `L`) - error correction level. Note, the level affects QR Code data size. Allowed values:
         - `L` - Allows recovery of up to 7% data loss
         - `M` - Allows recovery of up to 15% data loss
         - `Q` - Allows recovery of up to 25% data loss
         - `H` - Allows recovery of up to 30% data loss
 
-    - `typeNumber` (number, default = `0`) - data capacity type, see details in appendix 4.1. Type number (`1` ~ `40`), or `0` for auto detection.
-    - `invert` (boolean, default = `false`) - inverting data of QR code.
-    - `padding` (number, default = `1`) - count of white spaces on sides QR code. 1 unit has size like 1 information block.
-    - `errorsEnabled`: (boolean, default = `false`) - if it is enabled and QR code generator can not create a QR Code then an error will thrown. If it is disabled then methods will return `null` of fail.
+    - `typeNumber` (number, optional, default = `0`) - data capacity type, see details in appendix 4.1. Type number (`1` ~ `40`), or `0` for auto detection.
+    - `invert` (boolean, optional, default = `false`) - inverting data of QR code.
+    - `padding` (number, optional, default = `1`) - count of white spaces on sides QR code. 1 unit has size like 1 information dot.
+    - `errorsEnabled`: (boolean, optional, default = `false`) - if it is enabled and QR code generator can not create a QR Code then an error will thrown. If it is disabled then methods will return `null` of fail.
 
 #### `setValue(value: string): void`
 Set new value for encoding to QR code
@@ -128,6 +128,107 @@ if (qrCodeRaw) {
 ```
 
 #### 3.2. class `QRCodeCanvas`
+
+The QR code generator based on HTML5 Canvas. It can create a canvas with QR code, or PNG/JPG data url.
+The class extends `QRCodeRaw`, therefore please see there description about public method and configuration params.
+
+```javascript
+import { QRCodeCanvas } from '@cheprasov/qrcode';
+```
+
+Public methods:
+
+#### `constructor(value: string, config: object)`
+Create new instance of QRCodeCanvas. Please see config description of `QRCodeRaw.constructor`.
+
+Config has additional parameters:
+- `config` (object, optional) - parameters of configuration
+    - (see config of `QRCodeRaw.constructor`).
+    - `fgColor` (string, optional, default = `#000`) - foreground color of the QR code, is it allowed to use the next formats:
+        - `RGB` or `#RGB`, example: `#ABC`, will be converted to `#AABBCC`
+        - `RGBA` or `#RGBA`, example: `#ABCD`, will be converted to `#AABBCCDD`
+        - `RRGGBB` or `#RRGGBB`, example: `#AABBCC`
+        - `RRGGBBAA` or `#RRGGBBAA`, example: `#AABBCCDD`
+        - Other formats (like `red`, `rgb(...)`, `rgba(...)`) are not supported and will be converted to `#0000`
+    - `bgColor` (string, optional, default = `#FFF`) - background color of the QR code, see description of `fgColor`.
+    - `scale` (number, optional, default = `10`) - scale size of QR code. For example, when scale is 5 then QR generator will use 5 pixel for draw 1 data dot.
+    - `size` (number, optional, default = `null`) - size (width & height) of canvas in pixels. If size is specified then scale param will be ignored. Note, that the original canvas with QR code will be stretched to the specified size.
+    - `image` (object, optional, default = `null`) - parameters on an image, that should be added to QR code, like logo.
+        - `source` (string|Image|Canvas) - source of image for QR Code, allowed to use the next types:
+            - `string` - url to resource or dataUrl of image.
+            - `Image` - it is allowed to use Image. The image's src should be loaded before use it.
+            - `Canvas` - allowed to use HTML5 canvas element.
+        - `width` (number|string) - width of the image in QR code dots (not a pixel), allowed formats:
+            - `<number>` - defines the width of image, example: `width: 30`
+            - `<number>%` - defines the width in percent of QR code without padding, example: `width: '20%'`
+            - `height` (number|string) - height of the image in QR code dots, see `width`
+        - `x` (number|string, optional, default = `0`) - position of image on QR code by horizontal in QR code dots (not a pixel), allowed formats:
+            - `<number>` - sets the left edge position from left to right, example: `x: 10`
+            - `<number>%` - sets the left edge position in % of QR code without padding. Negative values are allowed. Example: `x: '50%'`
+            - `left` -  aligns the image to the left, example: `x: 'left'`
+            - `right` -  aligns the image to the right, example: `x: 'right'`
+            - `center` - Centers the image in center of QR code,  example: `x: 'center'`
+            - `left <number>` - the same as `<number>`
+            - `left <number> %` - the same as `<number>%`
+            - `right <number>` - sets the right edge position from right to left, example: `x: 'right 5'`
+            - `right <number>%` - sets the tight edge position in % of QR code without padding, example: `x: 'right 10%'`
+        - `y` (number|string, optional, default = `0`) - position of image on QR code by vertical in QR code dots (not a pixel), allowed formats:
+            - `<number>` - sets the top edge position from top to bottom, example: `y: 10`
+            - `<number>%` - sets the top edge position in % of QR code without padding. Negative values are allowed. Example: `y: '50%'`
+            - `top` -  aligns the image to the top, example: `y: 'top'`
+            - `bottom` -  aligns the image to the bottom, example: `y: 'bottom'`
+            - `center` - Centers the image in center of QR code,  example: `y: 'center'`
+            - `top <number>` - the same as `<number>`
+            - `top <number> %` - the same as `<number>%`
+            - `bottom <number>` - sets the bottom edge position from bottom to top, example: `x: 'right 5'`
+            - `bottom <number>%` - sets the bottom edge position in % of QR code without padding, example: `x: 'right 10%'`
+        - `border` (number|null, optional, default = 1) - white space length around the images in dots. Negative values are allowed.
+            - use `0` - for white space only under the image
+            - use `null` to remove any white spaces under image and leave QR data dots
+
+#### `getCanvas(): null | HTMLCanvasElement | Promise`
+Returns new canvas element with QR code. If QR code can not be generated then `null` will be returned.
+If `config.image` is provided AND `config.image.source` is `string` (url or dataUrl) then a promise will be returned with a canvas as result.
+
+#### `toDataUrl(type: string = 'image/png', encoderOptions: number = 0.92): null | string | Promise`
+Allowed alias: `toDataURL(...)`
+Returns dataUrl with QR code. If QR code can not be generated then `null` will be returned.
+If `config.image` is provided AND `config.image.source` is `string` (url or dataUrl) then a promise will be returned with a dataUrl as result.
+See params descriptions here: https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toDataURL
+
+Example
+```javascript
+import { QRCodeCanvas } from '@cheprasov/qrcode';
+
+const qrCanvas = new QRCodeCanvas('some value');
+const dataUrl = qrCanvas.toDataUrl();
+console.log(dataUrl); // data:image/png;base64,iVBORw0KGgoAAAA...g==
+```
+
+Example with promise
+```javascript
+import { QRCodeCanvas } from '@cheprasov/qrcode';
+
+// Example with promise
+const config = {
+    level: 'H', // use high error correction level
+    padding: 0, // do not use padding around qr code data,
+    image: {
+        source: 'https://some-url.com/foo.png', // or data:image/jpeg;base64,...
+        width: '10%',
+        height: '10%',
+        x: 'center',
+        y: 'center',
+    }
+};
+
+const qrCanvas = new QRCodeCanvas('some value', config);
+const promise = qrCanvas.toDataUrl();
+// promise is returned because image.source is a string
+promise.then((dataUrl) => {
+    console.log(dataUrl); // data:image/png;base64,iVBORw0KGgoAAAAN...
+});
+```
 ...
 
 #### 3.3. class `QRCodeSVG`
