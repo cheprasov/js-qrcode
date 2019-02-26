@@ -6,6 +6,7 @@
 The library is for generating QR codes using SVG, HTML5 canvas, text, PNG and JPG files (via canvas).
 
 #### Features:
+- The library has classes for generation SVG, Canvas, PNG / JPG or text QR code.
 - Easy to use and configure (error correction level, type number, padding and so on).
 - Supports inverting of data.
 
@@ -327,7 +328,64 @@ console.log(svg);
 ```
 
 #### 3.4. class `QRCodeText`
-...
+
+The class creates QR code as text. It is possible to show QR code in terminal.
+The class extends `QRCodeRaw`, therefore please see there description about public method and configuration params.
+
+```javascript
+import { QRCodeSVG } from '@cheprasov/qrcode';
+```
+
+Public methods:
+
+#### `constructor(value: string, config: object)`
+Create new instance of QRCodeSVG. Please see config description of `QRCodeRaw.constructor`.
+
+Config has additional parameters:
+- `config` (object, optional) - parameters of configuration
+    - (see config of `QRCodeRaw.constructor`).
+    - `blackSymbol` (string, optional, default = `▓▓`) - symbol(s) for black QR code dot.
+    - `whiteSymbol` (string, optional, default = `  `) - symbol(s) for white QR code dot.
+
+#### `toString(): null | string `
+Returns QR code as string. If QR code can not be generated then `null` will be returned.
+
+Example
+```javascript
+import { QRCodeText } from '@cheprasov/qrcode';
+
+const qrText = new QRCodeText('some value', {
+    blackSymbol: '@@',
+    whiteSymbol: '..',
+});
+const qrCode = qrText.toString();
+console.log(qrCode);
+
+// ..............................................
+// ..@@@@@@@@@@@@@@..@@@@@@@@@@..@@@@@@@@@@@@@@..
+// ..@@..........@@..@@@@..@@@@..@@..........@@..
+// ..@@..@@@@@@..@@....@@@@@@....@@..@@@@@@..@@..
+// ..@@..@@@@@@..@@....@@..@@@@..@@..@@@@@@..@@..
+// ..@@..@@@@@@..@@..@@......@@..@@..@@@@@@..@@..
+// ..@@..........@@..@@..@@......@@..........@@..
+// ..@@@@@@@@@@@@@@..@@..@@..@@..@@@@@@@@@@@@@@..
+// ..................@@@@@@@@....................
+// ..@@@@@@....@@@@..@@@@@@@@@@@@@@@@@@....@@@@..
+// ..@@@@@@@@..@@..@@..........@@@@..@@@@@@..@@..
+// ..@@......@@..@@@@..@@@@....@@@@..@@......@@..
+// ......@@..@@@@..@@........@@@@..@@..@@..@@@@..
+// ....@@..@@@@@@@@..@@............@@@@@@..@@@@..
+// ..................@@@@@@@@..@@....@@@@@@@@@@..
+// ..@@@@@@@@@@@@@@........@@@@..@@..@@..@@..@@..
+// ..@@..........@@..@@@@@@@@..@@....@@@@....@@..
+// ..@@..@@@@@@..@@....@@..@@@@@@....@@@@..@@....
+// ..@@..@@@@@@..@@......@@....@@..@@@@@@........
+// ..@@..@@@@@@..@@..@@..........@@..@@..@@@@@@..
+// ..@@..........@@..@@......@@..................
+// ..@@@@@@@@@@@@@@..@@@@......@@@@@@@@@@....@@..
+// ..............................................
+
+```
 
 ### 4. Appendix
 

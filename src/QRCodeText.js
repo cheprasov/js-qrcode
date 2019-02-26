@@ -32,7 +32,7 @@ export default class QRCodeText extends QRCodeRaw {
         this.qrCodeText = null;
     }
 
-    toText(): ?string {
+    toString(): null | string {
         if (this.qrCodeText) {
             return this.qrCodeText;
         }

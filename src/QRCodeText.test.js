@@ -64,11 +64,11 @@ describe('QRCodeText', () => {
         });
     });
 
-    describe('toText', () => {
+    describe('toString', () => {
         it('should return null if qrCodeData is empty', () => {
             const qrCode = new QRCodeText('test');
             qrCode.getData = jest.fn(() => null);
-            expect(qrCode.toText()).toBeNull();
+            expect(qrCode.toString()).toBeNull();
         });
 
         it('should return text QR code', () => {
@@ -80,7 +80,7 @@ describe('QRCodeText', () => {
                 [true, false, false, false, true],
                 [true, true, true, true, true],
             ]);
-            expect(qrCode.toText()).toEqual('▓▓▓▓▓▓▓▓▓▓\n▓▓      ▓▓\n▓▓  ▓▓  ▓▓\n▓▓      ▓▓\n▓▓▓▓▓▓▓▓▓▓\n');
+            expect(qrCode.toString()).toEqual('▓▓▓▓▓▓▓▓▓▓\n▓▓      ▓▓\n▓▓  ▓▓  ▓▓\n▓▓      ▓▓\n▓▓▓▓▓▓▓▓▓▓\n');
         });
     });
 
