@@ -196,7 +196,7 @@ Config has additional parameters:
             - `right` -  aligns the image to the right, example: `x: 'right'`
             - `center` - Centers the image in center of QR code,  example: `x: 'center'`
             - `left <number>` - the same as `<number>`
-            - `left <number> %` - the same as `<number>%`
+            - `left <number>%` - the same as `<number>%`
             - `right <number>` - sets the right edge position from right to left, example: `x: 'right 5'`
             - `right <number>%` - sets the tight edge position in % of QR code without padding, example: `x: 'right 10%'`
         - `y` (number|string, optional, default = `0`) - position of image on QR code by vertical in QR code dots (not a pixel), allowed formats:
@@ -206,7 +206,7 @@ Config has additional parameters:
             - `bottom` -  aligns the image to the bottom, example: `y: 'bottom'`
             - `center` - Centers the image in center of QR code,  example: `y: 'center'`
             - `top <number>` - the same as `<number>`
-            - `top <number> %` - the same as `<number>%`
+            - `top <number>%` - the same as `<number>%`
             - `bottom <number>` - sets the bottom edge position from bottom to top, example: `y: 'bottom 5'`
             - `bottom <number>%` - sets the bottom edge position in % of QR code without padding, example: `y: 'bottom 10%'`
         - `border` (number|null, optional, default = 1) - white space length around the images in dots. Negative values are allowed.
@@ -297,7 +297,7 @@ Config has additional parameters:
             - `right` -  aligns the image to the right, example: `x: 'right'`
             - `center` - Centers the image in center of QR code,  example: `x: 'center'`
             - `left <number>` - the same as `<number>`
-            - `left <number> %` - the same as `<number>%`
+            - `left <number>%` - the same as `<number>%`
             - `right <number>` - sets the right edge position from right to left, example: `x: 'right 5'`
             - `right <number>%` - sets the tight edge position in % of QR code without padding, example: `x: 'right 10%'`
         - `y` (number|string, optional, default = `0`) - position of image on QR code by vertical in QR code dots (not a pixel), allowed formats:
@@ -307,7 +307,7 @@ Config has additional parameters:
             - `bottom` -  aligns the image to the bottom, example: `y: 'bottom'`
             - `center` - Centers the image in center of QR code,  example: `y: 'center'`
             - `top <number>` - the same as `<number>`
-            - `top <number> %` - the same as `<number>%`
+            - `top <number>%` - the same as `<number>%`
             - `bottom <number>` - sets the bottom edge position from bottom to top, example: `y: 'bottom 5'`
             - `bottom <number>%` - sets the bottom edge position in % of QR code without padding, example: `y: 'bottom 10%'`
         - `border` (number|null, optional, default = 1) - white space length around the images in dots. Negative values are allowed.
