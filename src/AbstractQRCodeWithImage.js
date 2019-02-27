@@ -21,6 +21,8 @@ const DEFAULT_OPTIONS = {
     image: null,
 };
 
+const DEFAULT_IMAGE_BORDER = 1;
+
 export default class AbstractQRCodeWithImage extends QRCodeRaw {
 
     image: ?ImageConfigType = null;
@@ -72,7 +74,11 @@ export default class AbstractQRCodeWithImage extends QRCodeRaw {
         const height = DimensionUtils.calculateDimension(this.image.height, dataSizeWithoutPadding);
         const x = DimensionUtils.calculatePosition(this.image.x, width, dataSizeWithoutPadding) + this.padding;
         const y = DimensionUtils.calculatePosition(this.image.y, height, dataSizeWithoutPadding) + this.padding;
-        const border = typeof this.image.border === 'number' ? this.image.border : null;
+
+        let border = DEFAULT_IMAGE_BORDER;
+        if (typeof this.image.border === 'number' || this.image.border === null) {
+            border = this.image.border;
+        }
 
         this.imageConfig = { source, border, x, y, width, height };
         return this.imageConfig;

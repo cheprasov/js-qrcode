@@ -10,18 +10,18 @@ The library is for generating QR codes using SVG, HTML5 canvas, text, PNG and JP
 - Easy to use and configure (error correction level, type number, padding and so on).
 - Supports inverting of data.
 
-- SVG
+- SVG (see [class `QRCodeSVG`](#33-class-qrcodesvg))
     - Returns generated QR code as SVG (xml) or DataURL.
     - Optimized SVG structure for xml and for DataURL.
     - Supports adding a image (logo) to QR code (allows to use url, dataUrl, Image, Canvas for image on QR Code)
 
-- Canvas
+- Canvas (see [class `QRCodeCanvas`](#32-class-qrcodecanvas))
     - Returns QR Code as text/html or DataURL.
     - Supports adding a image (logo) to QR code (allows to use url, dataUrl, Image, Canvas for image on QR Code).
     - Has image loader for adding it to QR code.
     - It is possible to specify scale or canvas size.
 
-- Text
+- Text (see [class `QRCodeText`](34-class-qrcodetext))
     - It is possible to create QR code for consoles or text output.
 
 - The library is covered by tests.
@@ -86,7 +86,7 @@ Params:
         - `Q` - Allows recovery of up to 25% data loss
         - `H` - Allows recovery of up to 30% data loss
 
-    - `typeNumber` (number, optional, default = `0`) - data capacity type, see details in appendix 4.1. Type number (`1` ~ `40`), or `0` for auto detection.
+    - `typeNumber` (number, optional, default = `0`) - data capacity type, see details in [appendix 4.1](#41-data-capacity-in-bytes). Type number (`1` ~ `40`), or `0` for auto detection.
     - `invert` (boolean, optional, default = `false`) - inverting data of QR code.
     - `padding` (number, optional, default = `1`) - count of white spaces on sides QR code. 1 unit has size like 1 information dot.
     - `errorsEnabled`: (boolean, optional, default = `false`) - if it is enabled and QR code generator can not create a QR Code then an error will thrown. If it is disabled then methods will return `null` of fail.
@@ -130,7 +130,7 @@ if (qrCodeRaw) {
 #### 3.2. class `QRCodeCanvas`
 
 The QR code generator based on HTML5 Canvas. It can create a canvas with QR code, or PNG/JPG data url.
-The class extends `QRCodeRaw`, therefore please see there description about public method and configuration params.
+The class extends [`QRCodeRaw`](31-class-qrcoderaw), therefore please see there description about public method and configuration params.
 
 ```javascript
 import { QRCodeCanvas } from '@cheprasov/qrcode';
@@ -139,11 +139,11 @@ import { QRCodeCanvas } from '@cheprasov/qrcode';
 Public methods:
 
 #### `constructor(value: string, config: object)`
-Create new instance of QRCodeCanvas. Please see config description of `QRCodeRaw.constructor`.
+Create new instance of QRCodeCanvas. Please see config description of [`QRCodeRaw.constructor`](#constructorvalue-string-config-object).
 
 Config has additional parameters:
 - `config` (object, optional) - parameters of configuration
-    - (see config of `QRCodeRaw.constructor`).
+    - see config of [`QRCodeRaw.constructor`](#constructorvalue-string-config-object)
     - `fgColor` (string, optional, default = `#000`) - foreground color of the QR code, is it allowed to use the next formats:
         - `RGB` or `#RGB`, example: `#ABC`, will be converted to `#AABBCC`
         - `RGBA` or `#RGBA`, example: `#ABCD`, will be converted to `#AABBCCDD`
@@ -185,6 +185,11 @@ Config has additional parameters:
         - `border` (number|null, optional, default = 1) - white space length around the images in dots. Negative values are allowed.
             - use `0` - for white space only under the image
             - use `null` to remove any white spaces under image and leave QR data dots
+
+#### `draw(canvas: HTMLCanvasElement = null): null | HTMLCanvasElement| Promise`
+Draws QR code on a canvas element and return the canvas if the canvas is provided, or returns a new canvas element if canvas is not provided (see `getCanvas()`).
+If QR code can not be generated then `null` will be returned.
+If `config.image` is provided AND `config.image.source` is `string` (url or dataUrl) then a promise will be returned with a canvas as result.
 
 #### `getCanvas(): null | HTMLCanvasElement | Promise`
 Returns new canvas element with QR code. If QR code can not be generated then `null` will be returned.
@@ -233,7 +238,7 @@ promise.then((dataUrl) => {
 #### 3.3. class `QRCodeSVG`
 
 The class creates QR code as SVG in string or data url formats.
-The class extends `QRCodeRaw`, therefore please see there description about public method and configuration params.
+The class extends [`QRCodeRaw`](31-class-qrcoderaw), therefore please see there description about public method and configuration params.
 
 ```javascript
 import { QRCodeSVG } from '@cheprasov/qrcode';
@@ -242,11 +247,11 @@ import { QRCodeSVG } from '@cheprasov/qrcode';
 Public methods:
 
 #### `constructor(value: string, config: object)`
-Create new instance of QRCodeSVG. Please see config description of `QRCodeRaw.constructor`.
+Create new instance of QRCodeSVG. Please see config description of [`QRCodeRaw.constructor`](#constructorvalue-string-config-object).
 
 Config has additional parameters:
 - `config` (object, optional) - parameters of configuration
-    - (see config of `QRCodeRaw.constructor`).
+    - see config of [`QRCodeRaw.constructor`](#constructorvalue-string-config-object)
     - `fgColor` (string, optional, default = `#000`) - foreground color of the QR code in CSS format
     - `bgColor` (string, optional, default = `#FFF`) - background color of the QR code in CSS format
     - `image` (object, optional, default = `null`) - parameters on an image, that should be added to QR code, like logo.
@@ -330,7 +335,7 @@ console.log(svg);
 #### 3.4. class `QRCodeText`
 
 The class creates QR code as text. It is possible to show QR code in terminal.
-The class extends `QRCodeRaw`, therefore please see there description about public method and configuration params.
+The class extends [`QRCodeRaw`](31-class-qrcoderaw), therefore please see there description about public method and configuration params.
 
 ```javascript
 import { QRCodeSVG } from '@cheprasov/qrcode';
@@ -339,11 +344,11 @@ import { QRCodeSVG } from '@cheprasov/qrcode';
 Public methods:
 
 #### `constructor(value: string, config: object)`
-Create new instance of QRCodeSVG. Please see config description of `QRCodeRaw.constructor`.
+Create new instance of QRCodeSVG. Please see config description of [`QRCodeRaw.constructor`](#constructorvalue-string-config-object).
 
 Config has additional parameters:
 - `config` (object, optional) - parameters of configuration
-    - (see config of `QRCodeRaw.constructor`).
+    - see config of [`QRCodeRaw.constructor`](#constructorvalue-string-config-object)
     - `blackSymbol` (string, optional, default = `▓▓`) - symbol(s) for black QR code dot.
     - `whiteSymbol` (string, optional, default = `  `) - symbol(s) for white QR code dot.
 

@@ -64,7 +64,7 @@ export default class QRCodeCanvas extends AbstractQRCodeWithImage {
         return dataSize;
     }
 
-    _draw(): null | Promise | HTMLCanvasElement {
+    draw(canvas: ?HTMLCanvasElement = null): null | HTMLCanvasElement | Promise {
         const dataSize = this.getDataSize();
         if (!dataSize) {
             return null;
@@ -99,7 +99,7 @@ export default class QRCodeCanvas extends AbstractQRCodeWithImage {
 
         const canvasSize = this._getCanvasSize();
 
-        const qrCodeCanvas = document.createElement('canvas');
+        const qrCodeCanvas = canvas || document.createElement('canvas');
         qrCodeCanvas.width = canvasSize;
         qrCodeCanvas.height = canvasSize;
 
@@ -164,11 +164,11 @@ export default class QRCodeCanvas extends AbstractQRCodeWithImage {
     }
 
     getCanvas(): null | HTMLCanvasElement | Promise {
-        return this._draw();
+        return this.draw();
     }
 
     toDataUrl(type: string = 'image/png', encoderOptions: number = 0.92): null | string | Promise {
-        const canvasOrPromise = this._draw();
+        const canvasOrPromise = this.draw();
         if (!canvasOrPromise) {
             return null;
         }

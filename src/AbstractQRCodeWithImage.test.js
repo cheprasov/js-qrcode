@@ -312,6 +312,35 @@ describe('AbstractQRCodeWithImage', () => {
             });
         });
 
+        it('should use default border = 1if image.border is not provided', () => {
+            const qrCode = new AbstractQRCodeWithImage('test', {
+                image: {
+                    source: 'foo.png',
+                    x: 'right',
+                    y: 'bottom',
+                    width: 3,
+                    height: 2,
+                },
+            });
+            expect(qrCode.getData()).toEqual([
+                [false, false, false, false, false, false, false],
+                [false, true, true, true, true, true, false],
+                [false, true, false, false, false, true, false],
+                [false, true, false, false, false, false, false],
+                [false, true, false, false, false, false, false],
+                [false, true, false, false, false, false, false],
+                [false, false, false, false, false, false, false],
+            ]);
+            expect(qrCode.imageConfig).toEqual({
+                source: 'foo.png',
+                x: 3,
+                y: 4,
+                width: 3,
+                height: 2,
+                border: 1,
+            });
+        });
+
         it('should remove data under image and min border if image.border is less than 0', () => {
             const qrCode = new AbstractQRCodeWithImage('test', {
                 image: {

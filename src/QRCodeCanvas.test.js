@@ -199,35 +199,35 @@ describe('QRCodeCanvas', () => {
     });
 
     describe('getCanvas', () => {
-        it('should return result of call _draw()', () => {
+        it('should return result of call draw()', () => {
             const qrCode = new QRCodeCanvas('test');
 
-            qrCode._draw = jest.fn(() => null);
+            qrCode.draw = jest.fn(() => null);
             expect(qrCode.getCanvas()).toBeNull();
 
             const canvas = document.createElement('canvas');
-            qrCode._draw = jest.fn(() => canvas);
+            qrCode.draw = jest.fn(() => canvas);
             expect(qrCode.getCanvas()).toBe(canvas);
 
-            qrCode._draw = jest.fn(() => Promise.resolve(canvas));
+            qrCode.draw = jest.fn(() => Promise.resolve(canvas));
             expect(qrCode.getCanvas()).toBeInstanceOf(Promise);
         });
     });
 
-    describe('_draw', () => {
+    describe('draw', () => {
         it('should return null if dataSize is empty', () => {
             const qrCode = new QRCodeCanvas('test');
             qrCode.getDataSize = jest.fn(() => null);
-            expect(qrCode._draw()).toBeNull();
+            expect(qrCode.draw()).toBeNull();
         });
 
         it('should return null if data are empty', () => {
             const qrCode = new QRCodeCanvas('test');
             qrCode.getData = jest.fn(() => null);
-            expect(qrCode._draw()).toBeNull();
+            expect(qrCode.draw()).toBeNull();
         });
 
-        it('should draw QR code', () => {
+        it('should draw QR code and return new canvas', () => {
             const qrCode = new QRCodeCanvas('test', { bgColor: '#05060700', fgColor: '#01020304', scale: 8 });
             qrCode.getData = jest.fn(() => [
                 [true, true, true, true, true],
@@ -236,8 +236,50 @@ describe('QRCodeCanvas', () => {
                 [true, false, false, false, true],
                 [true, true, true, true, true],
             ]);
-            const qrCodeCanvas = qrCode._draw();
+            const qrCodeCanvas = qrCode.draw();
             expect(qrCodeCanvas).toBeInstanceOf(HTMLCanvasElement);
+            expect(qrCode.canvasContext.putImageData).toHaveBeenCalledTimes(1);
+            const putImageDataArgs = qrCode.canvasContext.putImageData.mock.calls[0];
+            const imageData = putImageDataArgs[0];
+            expect(imageData).toBeInstanceOf(ImageData);
+            expect(imageData.bytes).toBeInstanceOf(Uint8ClampedArray);
+            const expectUint8ClampedArray = new Uint8ClampedArray(5 * 5 * 4);
+            expectUint8ClampedArray.set([
+                1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4,
+                1, 2, 3, 4, 5, 6, 7, 0, 5, 6, 7, 0, 5, 6, 7, 0, 1, 2, 3, 4,
+                1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4,
+                1, 2, 3, 4, 5, 6, 7, 0, 5, 6, 7, 0, 5, 6, 7, 0, 1, 2, 3, 4,
+                1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4,
+            ], 0);
+            expect(imageData.bytes).toEqual(expectUint8ClampedArray);
+            expect(imageData.width).toEqual(5);
+            expect(imageData.height).toEqual(5);
+
+            expect(qrCode.canvas.width).toEqual(5);
+            expect(qrCode.canvas.height).toEqual(5);
+
+            expect(putImageDataArgs[1]).toEqual(0);
+            expect(putImageDataArgs[2]).toEqual(0);
+
+            expect(qrCodeCanvas.mockedContext.imageSmoothingEnabled).toEqual(false);
+            expect(qrCodeCanvas.width).toEqual(40);
+            expect(qrCodeCanvas.height).toEqual(40);
+            expect(qrCodeCanvas.mockedContext.drawImage).toHaveBeenCalledWith(qrCode.canvas, 0, 0, 40, 40);
+        });
+
+        it('should draw QR code and return provided canvas', () => {
+            const qrCode = new QRCodeCanvas('test', { bgColor: '#05060700', fgColor: '#01020304', scale: 8 });
+            qrCode.getData = jest.fn(() => [
+                [true, true, true, true, true],
+                [true, false, false, false, true],
+                [true, false, true, false, true],
+                [true, false, false, false, true],
+                [true, true, true, true, true],
+            ]);
+            const canvas = document.createElement('canvas');
+            const qrCodeCanvas = qrCode.draw(canvas);
+            expect(qrCodeCanvas).toBeInstanceOf(HTMLCanvasElement);
+            expect(qrCodeCanvas).toBe(canvas);
             expect(qrCode.canvasContext.putImageData).toHaveBeenCalledTimes(1);
             const putImageDataArgs = qrCode.canvasContext.putImageData.mock.calls[0];
             const imageData = putImageDataArgs[0];
@@ -278,13 +320,13 @@ describe('QRCodeCanvas', () => {
 
         it('should return null if canvas is not drawn', () => {
             const qrCode = new QRCodeCanvas('test');
-            qrCode._draw = jest.fn(() => null);
+            qrCode.draw = jest.fn(() => null);
             expect(qrCode.toDataUrl()).toBeNull();
         });
 
-        it('should return promise if _draws returns a promise', () => {
+        it('should return promise if draws returns a promise', () => {
             const qrCode = new QRCodeCanvas('test');
-            qrCode._draw = jest.fn(() => Promise.resolve(canvas));
+            qrCode.draw = jest.fn(() => Promise.resolve(canvas));
             const result = qrCode.toDataUrl();
             expect(result).toBeInstanceOf(Promise);
             return result.then((url) => {
@@ -292,9 +334,9 @@ describe('QRCodeCanvas', () => {
             });
         });
 
-        it('should return string if _draws returns a canvas', () => {
+        it('should return string if draws returns a canvas', () => {
             const qrCode = new QRCodeCanvas('test');
-            qrCode._draw = jest.fn(() => canvas);
+            qrCode.draw = jest.fn(() => canvas);
             expect(qrCode.toDataUrl()).toEqual('data:url');
         });
     });
