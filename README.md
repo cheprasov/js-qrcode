@@ -44,7 +44,7 @@ import { QRCodeRaw, QRCodeSVG, QRCodeCanvas, QRCodeText } from '@cheprasov/qrcod
 
 ### 2. Quick examples
 
-Create SVG QR Code
+#### 2.1. Create SVG QR Code
 ```javascript
 import { QRCodeSVG } from '@cheprasov/qrcode';
 
@@ -53,7 +53,7 @@ const dataUrlWithSVGQRCode = qrSVG.toDataUrl();
 const xmlWithQRCode = qrSVG.toString();
 ```
 
-Create Image QR Code
+#### 2.2. Create Image QR Code
 ```javascript
 import { QRCodeCanvas } from '@cheprasov/qrcode';
 
@@ -62,7 +62,7 @@ const dataUrlWithQRCode = qrCanvas.toDataUrl();
 const canvasWithQRCode = qrCanvas.getCanvas();
 ```
 
-QR Code with Image
+#### 2.3. QR Code with Image
 ```javascript
 import { QRCodeSVG } from '@cheprasov/qrcode';
 
