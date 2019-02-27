@@ -62,6 +62,27 @@ const dataUrlWithQRCode = qrCanvas.toDataUrl();
 const canvasWithQRCode = qrCanvas.getCanvas();
 ```
 
+QR Code with Image
+```javascript
+import { QRCodeSVG } from '@cheprasov/qrcode';
+
+const divElement = document.getElementById('some-id');
+
+const qrSVG = new QRCodeSVG('https://github.com/cheprasov/js-qrcode/', {
+    level: 'Q',
+    image: {
+        source: 'GitHub-Mark-120px-plus.png',
+        width: '20%',
+        height: '20%',
+        x: 'center',
+        y: 'center',
+    },
+});
+divElement.innerHTML = qrSVG.toString();
+```
+Result:
+![test](qrcode_scheme.png)
+
 ### 3. Documentation
 
 #### 3.1. class `QRCodeRaw`
