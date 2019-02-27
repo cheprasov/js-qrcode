@@ -2,10 +2,12 @@
   "name": "@cheprasov/qrcode",
   "version": "0.1.0",
   "author": "Alexander Cheprasov",
-  "description": "",
+  "description": "The library is for generating QR codes like SVG, HTML5 Canvas, PNG and JPG files, or text.",
   "keywords": [
     "qr",
-    "qrcode"
+    "qrcode",
+    "SVG",
+    "canvas"
   ],
   "main": "dist/qrcode.js",
   "license": "MIT",
