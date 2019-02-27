@@ -3,34 +3,37 @@
 @cheprasov/qrcode
 =========
 
-The library is for generating QR codes using SVG, HTML5 canvas, text, PNG and JPG files (via canvas).
+The library is for generating QR codes like SVG, HTML5 Canvas, PNG and JPG files, or text.
 
 #### Features:
-- The library has classes for generation SVG, Canvas, PNG / JPG or text QR code.
-- Easy to use and configure (error correction level, type number, padding and so on).
+- The library has classes for generation SVG, Canvas, PNG / JPG or text with QR code.
+- it is easy to use and configure (error correction level, type number, padding and so on).
 - Supports inverting of data.
+- The library is covered by tests.
+- Easy to extend the classes or create own class for generation QR code.
 
 - SVG (see [class `QRCodeSVG`](#33-class-qrcodesvg))
     - Returns generated QR code as SVG (xml) or DataURL.
     - Optimized SVG structure for xml and for DataURL.
-    - Supports adding a image (logo) to QR code (allows to use url, dataUrl, Image, Canvas for image on QR Code)
+    - Supports adding an image (logo) to QR code (allows to use url, dataUrl, Image, Canvas). See [example](#23-qr-code-with-image)
+    - Allows to specify relative/abcolute position/size of image on QR code.
 
 - Canvas (see [class `QRCodeCanvas`](#32-class-qrcodecanvas))
-    - Returns QR Code as text/html or DataURL.
-    - Supports adding a image (logo) to QR code (allows to use url, dataUrl, Image, Canvas for image on QR Code).
-    - Has image loader for adding it to QR code.
+    - Draws QR code on provided canvas or returns new canvas element with QR code.
+    - Allows to get PNG / JPG files with QR code like dataUrl.
+    - Supports adding a image (logo) to QR code (allows to use url, dataUrl, Image, Canvas).
+    - Has image loader for images for QR code via Promise.
     - It is possible to specify scale or canvas size.
+    - Allows to specify relative/abcolute position/size of image on QR code.
 
 - Text (see [class `QRCodeText`](34-class-qrcodetext))
     - It is possible to create QR code for consoles or text output.
 
-- The library is covered by tests.
-- Easy to extend the classes or create own class for generation QR code.
-
 
 #### Plans to do:
 
-- Add possibility to use patterns, themes and flexible customisation of QR code.
+- To add possibility to use patterns, themes and flexible customisation of QR code.
+- to add support of rgb & rgba format for canvas colors.
 
 ### 1. How to install
 
@@ -81,6 +84,9 @@ const qrSVG = new QRCodeSVG('https://github.com/cheprasov/js-qrcode/', {
 divElement.innerHTML = qrSVG.toString();
 ```
 Result:
+
+Note, padding & image.border = 1 by default.
+
 ![test](qrcode_scheme.png)
 
 ### 3. Documentation
@@ -173,7 +179,7 @@ Config has additional parameters:
         - Other formats (like `red`, `rgb(...)`, `rgba(...)`) are not supported and will be converted to `#0000`
     - `bgColor` (string, optional, default = `#FFF`) - background color of the QR code, see description of `fgColor`.
     - `scale` (number, optional, default = `10`) - scale size of QR code. For example, when scale is 5 then QR generator will use 5 pixel for draw 1 data dot.
-    - `size` (number, optional, default = `null`) - size (width & height) of canvas in pixels. If size is specified then scale param will be ignored. Note, that the original canvas with QR code will be stretched to the specified size.
+    - `size` (number, optional, default = `null`) - size (width & height) of canvas in pixels. If size is specified then scale param will be ignored. Note, that the original canvas with QR code will be stretched to the specified size. See [image scheme](#23-qr-code-with-image)
     - `image` (object, optional, default = `null`) - parameters on an image, that should be added to QR code, like logo.
         - `source` (string|Image|Canvas) - source of image for QR Code, allowed to use the next types:
             - `string` - url to resource or dataUrl of image.
@@ -275,7 +281,7 @@ Config has additional parameters:
     - see config of [`QRCodeRaw.constructor`](#constructorvalue-string-config-object)
     - `fgColor` (string, optional, default = `#000`) - foreground color of the QR code in CSS format
     - `bgColor` (string, optional, default = `#FFF`) - background color of the QR code in CSS format
-    - `image` (object, optional, default = `null`) - parameters on an image, that should be added to QR code, like logo.
+    - `image` (object, optional, default = `null`) - parameters on an image, that should be added to QR code, like logo. See [image scheme](#23-qr-code-with-image)
         - `source` (string|Image|Canvas) - source of image for QR Code, allowed to use the next types:
             - `string` - url to resource or dataUrl of image.
             - `Image` - it is allowed to use Image. It is not necessary to have loaded image.
