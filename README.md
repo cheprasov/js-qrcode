@@ -188,7 +188,7 @@ Config has additional parameters:
         - `width` (number|string) - width of the image in QR code dots (not a pixel), allowed formats:
             - `<number>` - defines the width of image, example: `width: 30`
             - `<number>%` - defines the width in percent of QR code without padding, example: `width: '20%'`
-            - `height` (number|string) - height of the image in QR code dots, see `width`
+        - `height` (number|string) - height of the image in QR code dots, see `width`
         - `x` (number|string, optional, default = `0`) - position of image on QR code by horizontal in QR code dots (not a pixel), allowed formats:
             - `<number>` - sets the left edge position from left to right, example: `x: 10`
             - `<number>%` - sets the left edge position in % of QR code without padding. Negative values are allowed. Example: `x: '50%'`
@@ -289,7 +289,7 @@ Config has additional parameters:
         - `width` (number|string) - width of the image in QR code dots (not a pixel), allowed formats:
             - `<number>` - defines the width of image, example: `width: 30`
             - `<number>%` - defines the width in percent of QR code without padding, example: `width: '20%'`
-            - `height` (number|string) - height of the image in QR code dots, see `width`
+        - `height` (number|string) - height of the image in QR code dots, see `width`
         - `x` (number|string, optional, default = `0`) - position of image on QR code by horizontal in QR code dots (not a pixel), allowed formats:
             - `<number>` - sets the left edge position from left to right, example: `x: 10`
             - `<number>%` - sets the left edge position in % of QR code without padding. Negative values are allowed. Example: `x: '50%'`
