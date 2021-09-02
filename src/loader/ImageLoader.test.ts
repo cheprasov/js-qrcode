@@ -10,18 +10,13 @@
 
 import ImageLoader from './ImageLoader';
 
-const GlobalImage = global.Image;
-let mockImage;
+let mockImage: any;
 
 beforeAll(() => {
+    // @ts-ignore
     global.Image = function() {
-        mockImage = new GlobalImage();
-        return mockImage;
+        mockImage = this;
     };
-});
-
-afterAll(() => {
-    global.Image = GlobalImage;
 });
 
 describe('ImageLoader', () => {

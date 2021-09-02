@@ -1,5 +1,3 @@
-"use strict";
-// @flow
 /*
  * This file is part of QR code library
  * git: https://github.com/cheprasov/js-qrcode
@@ -9,11 +7,10 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-exports.__esModule = true;
-var DimensionUtils = /** @class */ (function () {
-    function DimensionUtils() {
-    }
-    DimensionUtils.calculateDimension = function (value, canvasSize) {
+
+export default class DimensionUtils {
+
+    static calculateDimension(value: string | number, canvasSize: number): number {
         if (typeof value === 'number') {
             return value;
         }
@@ -21,8 +18,9 @@ var DimensionUtils = /** @class */ (function () {
             return Math.round(parseFloat(value) / 100 * canvasSize) || 0;
         }
         return parseFloat(value) || 0;
-    };
-    DimensionUtils.calculatePosition = function (value, size, canvasSize) {
+    }
+
+    static calculatePosition(value: string | number, size: number, canvasSize: number): number {
         if (typeof value === 'number') {
             return value;
         }
@@ -38,13 +36,15 @@ var DimensionUtils = /** @class */ (function () {
         if (value === 'center') {
             return Math.round((canvasSize - size) / 2);
         }
-        var match = value.match(/^(?:(right|bottom|left|top)\s+)?(-?[0-9.]+)(%)?$/);
+
+        const match = value.match(/^(?:(right|bottom|left|top)\s+)?(-?[0-9.]+)(%)?$/);
         if (!match) {
             return 0;
         }
-        var isRight = match[1] === 'right' || match[1] === 'bottom';
-        var isPercent = !!match[3];
-        var val = parseFloat(match[2]) || 0;
+        const isRight = match[1] === 'right' || match[1] === 'bottom';
+        const isPercent = !!match[3];
+        let val = parseFloat(match[2]) || 0;
+
         if (isPercent) {
             val = Math.round(val / 100 * canvasSize);
         }
@@ -52,7 +52,6 @@ var DimensionUtils = /** @class */ (function () {
             val = canvasSize - val - size;
         }
         return Math.round(val);
-    };
-    return DimensionUtils;
-}());
-exports["default"] = DimensionUtils;
+    }
+
+}

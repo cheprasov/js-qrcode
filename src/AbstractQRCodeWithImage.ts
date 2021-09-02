@@ -78,11 +78,11 @@ export default class AbstractQRCodeWithImage extends QRCodeRaw {
             return null;
         }
 
-        const dataSizeWithoutPadding = dataSize - this.padding * 2;
+        const dataSizeWithoutPadding = dataSize - this._padding * 2;
         const width = DimensionUtils.calculateDimension(this.image.width, dataSizeWithoutPadding);
         const height = DimensionUtils.calculateDimension(this.image.height, dataSizeWithoutPadding);
-        const x = DimensionUtils.calculatePosition(this.image.x, width, dataSizeWithoutPadding) + this.padding;
-        const y = DimensionUtils.calculatePosition(this.image.y, height, dataSizeWithoutPadding) + this.padding;
+        const x = DimensionUtils.calculatePosition(this.image.x, width, dataSizeWithoutPadding) + this._padding;
+        const y = DimensionUtils.calculatePosition(this.image.y, height, dataSizeWithoutPadding) + this._padding;
 
         let border = DEFAULT_IMAGE_BORDER;
         if (typeof this.image.border === 'number' || this.image.border === null) {
@@ -94,8 +94,8 @@ export default class AbstractQRCodeWithImage extends QRCodeRaw {
     }
 
     getData(): ?QRCodeDataType {
-        if (this.qrCodeData) {
-            return this.qrCodeData;
+        if (this._qrCodeData) {
+            return this._qrCodeData;
         }
 
         const data = super.getData();
@@ -112,7 +112,7 @@ export default class AbstractQRCodeWithImage extends QRCodeRaw {
                 const endY = Math.min(begY + imageConfig.height + imageConfig.border * 2, data.length);
                 for (let y = begY; y < endY; y += 1) {
                     for (let x = begX; x < endX; x += 1) {
-                        data[y][x] = this.invert ? true : false;
+                        data[y][x] = this._isInvert ? true : false;
                     }
                 }
             }

@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
     entry: {
-        'qrcode.js': './src/index.js',
+        'qrcode.js': './src/index.ts',
     },
     output: {
         path: path.resolve(__dirname, 'dist/'),
@@ -10,6 +10,7 @@ module.exports = {
         libraryTarget: 'commonjs2',
     },
     resolve: {
+        extensions: ['.tsx', '.ts', '.js'],
         alias: {
             // '/SRC': path.resolve(__dirname, 'src/'),
         },
@@ -17,22 +18,9 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.test\.js$/,
+                test: /\.ts$/,
+                use: 'ts-loader',
                 exclude: /node_modules/,
-                use: [
-                    {
-                        loader: 'babel-jest',
-                    },
-                ],
-            },
-            {
-                test: /\.js$/,
-                exclude: /node_modules/,
-                use: [
-                    {
-                        loader: 'babel-loader',
-                    },
-                ],
             },
         ],
     },

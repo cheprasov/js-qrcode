@@ -37,24 +37,24 @@ describe('QRCodeSVG', () => {
     describe('constructor', () => {
         it('should use default params if nothing is provided', () => {
             const qrCode = new QRCodeSVG();
-            expect(qrCode.value).toBeUndefined();
-            expect(qrCode.padding).toEqual(1);
-            expect(qrCode.level).toEqual('L');
-            expect(qrCode.typeNumber).toEqual(0);
-            expect(qrCode.errorsEnabled).toBeFalsy();
-            expect(qrCode.invert).toBeFalsy();
+            expect(qrCode._value).toBeUndefined();
+            expect(qrCode._padding).toEqual(1);
+            expect(qrCode._level).toEqual('L');
+            expect(qrCode._typeNumber).toEqual(0);
+            expect(qrCode._areErrorsEnabled).toBeFalsy();
+            expect(qrCode._isInvert).toBeFalsy();
             expect(qrCode.fgColor).toEqual('#000');
             expect(qrCode.bgColor).toEqual('#FFF');
         });
 
         it('should default params for not specified params', () => {
             const qrCode = new QRCodeSVG('test 42', { level: 'Q' });
-            expect(qrCode.value).toEqual('test 42');
-            expect(qrCode.padding).toEqual(1);
-            expect(qrCode.level).toEqual('Q');
-            expect(qrCode.typeNumber).toEqual(0);
-            expect(qrCode.errorsEnabled).toBeFalsy();
-            expect(qrCode.invert).toBeFalsy();
+            expect(qrCode._value).toEqual('test 42');
+            expect(qrCode._padding).toEqual(1);
+            expect(qrCode._level).toEqual('Q');
+            expect(qrCode._typeNumber).toEqual(0);
+            expect(qrCode._areErrorsEnabled).toBeFalsy();
+            expect(qrCode._isInvert).toBeFalsy();
             expect(qrCode.fgColor).toEqual('#000');
             expect(qrCode.bgColor).toEqual('#FFF');
         });
@@ -72,12 +72,12 @@ describe('QRCodeSVG', () => {
                     bgColor: '#FFF',
                 },
             );
-            expect(qrCode.value).toEqual('test 84');
-            expect(qrCode.padding).toEqual(0);
-            expect(qrCode.level).toEqual('H');
-            expect(qrCode.typeNumber).toEqual(20);
-            expect(qrCode.errorsEnabled).toBeTruthy();
-            expect(qrCode.invert).toBeTruthy();
+            expect(qrCode._value).toEqual('test 84');
+            expect(qrCode._padding).toEqual(0);
+            expect(qrCode._level).toEqual('H');
+            expect(qrCode._typeNumber).toEqual(20);
+            expect(qrCode._areErrorsEnabled).toBeTruthy();
+            expect(qrCode._isInvert).toBeTruthy();
             expect(qrCode.fgColor).toEqual('#AAA');
             expect(qrCode.bgColor).toEqual('#FFF');
         });
@@ -91,11 +91,11 @@ describe('QRCodeSVG', () => {
     describe('_clearCache', () => {
         it('should clear qrCodeData and qrCodeText', () => {
             const qrCode = new QRCodeSVG('test');
-            qrCode.qrCodeData = [1, 2, 3, 4];
+            qrCode._qrCodeData = [1, 2, 3, 4];
             qrCode.qrCodeSVG = '<svg />';
             qrCode.qrCodeDataUrl = 'data:some-42';
             qrCode._clearCache();
-            expect(qrCode.qrCodeData).toBeNull();
+            expect(qrCode._qrCodeData).toBeNull();
             expect(qrCode.qrCodeDataUrl).toBeNull();
         });
     });
