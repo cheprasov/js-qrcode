@@ -23,11 +23,11 @@ import { Image } from "canvas";
 
 export interface ImageConfigInf {
     source: string | ImageInf | CanvasInf,
-    width: number | string, // 20 | 20%
-    height: number | string, // 20 | 20%
-    x: number | string, // 20 | 20% | center | left 20% | right 20%
-    y: number | string, // 20 | 20% | center | top 20% | bottom 20%,
-    border: number | null,
+    width?: number | string, // 20 | 20%
+    height?: number | string, // 20 | 20%
+    x?: number | string, // 20 | 20% | center | left 20% | right 20%
+    y?: number | string, // 20 | 20% | center | top 20% | bottom 20%,
+    border?: number | null,
 }
 
 export interface ImageCompiledConfigInf {
@@ -58,7 +58,7 @@ const DEFAULT_OPTIONS = {
 
 const DEFAULT_IMAGE_BORDER = 1;
 
-export default class AbstractQRCodeWithImage extends QRCodeRaw {
+export default abstract class AbstractQRCodeWithImage extends QRCodeRaw {
 
     protected _imageConfig: Nullable<ImageConfigInf>;
     protected _imageConstructor: Nullable<ImageConstructorInf>;
@@ -111,10 +111,14 @@ export default class AbstractQRCodeWithImage extends QRCodeRaw {
         }
 
         const dataSizeWithoutPadding = dataSize - this._padding * 2;
-        const width = DimensionUtils.calculateDimension(this._imageConfig.width, dataSizeWithoutPadding);
-        const height = DimensionUtils.calculateDimension(this._imageConfig.height, dataSizeWithoutPadding);
-        const x = DimensionUtils.calculatePosition(this._imageConfig.x, width, dataSizeWithoutPadding) + this._padding;
-        const y = DimensionUtils.calculatePosition(this._imageConfig.y, height, dataSizeWithoutPadding) + this._padding;
+        const width = DimensionUtils.calculateDimension(this._imageConfig.width ?? '20%', dataSizeWithoutPadding);
+        const height = DimensionUtils.calculateDimension(this._imageConfig.height ?? '20%', dataSizeWithoutPadding);
+        const x = DimensionUtils.calculatePosition(
+            this._imageConfig.x ?? 'center', width, dataSizeWithoutPadding,
+        ) + this._padding;
+        const y = DimensionUtils.calculatePosition(
+            this._imageConfig.y ?? 'center', height, dataSizeWithoutPadding,
+        ) + this._padding;
 
         let border: number | null = DEFAULT_IMAGE_BORDER;
         if (typeof this._imageConfig.border === 'number' || this._imageConfig.border === null) {
