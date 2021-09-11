@@ -1,4 +1,3 @@
-// @flow
 /*
  * This file is part of QR code library
  * git: https://github.com/cheprasov/js-qrcode
@@ -9,34 +8,35 @@
  * file that was distributed with this source code.
  */
 
-import type { OptionsType as ParentOptionsType } from './QRCodeRaw';
+import type { OptionsInf as ParentOptionsType } from './QRCodeRaw';
 import AbstractQRCodeWithImage from './AbstractQRCodeWithImage';
-import type { ImageConfigType } from './AbstractQRCodeWithImage';
 
-const TYPE_INT_WHITE = 0;
-const TYPE_INT_BLACK = 1;
-const TYPE_INT_PROCESSED = 2;
+enum TypeInt {
+    WHITE = 0,
+    BLACK = 1,
+    PROCESSED = 2,
+}
 
-type DataIntType = Array<Array<TYPE_INT_WHITE | TYPE_INT_BLACK | TYPE_INT_PROCESSED>>
+type DataIntType = TypeInt[][];
 
-type RectType = {
+interface RectInf {
     x: number,
     y: number,
+    id?: string,
     width?: number,
     height?: number,
-    id?: string,
-};
+}
 
-type RectsMapItemType = {
+interface RectsMapItemInf {
     count: number,
-    rect: RectType,
-    id?: string,
+    rect: RectInf,
     relative: boolean;
-};
+    id?: string,
+}
 
-export type OptionsType = ParentOptionsType & {
+export interface OptionsInf extends ParentOptionsType {
     fgColor: string,
-    bgColor?: string,
+    bgColor: string,
 }
 
 const DEFAULT_OPTIONS = {
@@ -46,28 +46,26 @@ const DEFAULT_OPTIONS = {
 
 export default class QRCodeSVG extends AbstractQRCodeWithImage {
 
-    fgColor: string;
-    bgColor: string;
-    qrCodeSVG: ?string = null;
-    qrCodeDataUrl: ?string = null;
+    protected _fgColor: string;
+    protected _bgColor: string;
+    protected _qrCodeSVG: string | null = null;
+    protected _qrCodeDataUrl: string | null = null;
 
-    constructor(value: string, options: OptionsType = {}) {
+    constructor(value: string, options: Partial<OptionsInf> = {}) {
         super(value, options);
         const params = { ...DEFAULT_OPTIONS, ...options };
 
-        this.fgColor = params.fgColor;
-        this.bgColor = params.bgColor;
-
-        this.toDataURL = this.toDataUrl;
+        this._fgColor = params.fgColor;
+        this._bgColor = params.bgColor;
     }
 
-    _clearCache(): void {
+    protected _clearCache(): void {
         super._clearCache();
-        this.qrCodeSVG = null;
-        this.qrCodeDataUrl = null;
+        this._qrCodeSVG = null;
+        this._qrCodeDataUrl = null;
     }
 
-    _getDataInt(): ?DataIntType {
+    protected _getDataInt(): DataIntType | null {
         const data = this.getData();
         if (!data) {
             return null;
@@ -75,18 +73,18 @@ export default class QRCodeSVG extends AbstractQRCodeWithImage {
         // copy boolean[][] to number[][]
         return data.map((row) => {
             return row.map((isBlack) => {
-                return isBlack ? TYPE_INT_BLACK : TYPE_INT_WHITE;
+                return isBlack ? TypeInt.BLACK : TypeInt.WHITE;
             });
         });
     }
 
-    _getRects(): ?RectType[] {
+    protected _getRects(): RectInf[] | null {
         const dataInt = this._getDataInt();
         if (!dataInt) {
             return null;
         }
 
-        const rects: RectType[] = [];
+        const rects: RectInf[] = [];
         const count = dataInt.length - 1;
 
         for (let y = 0; y <= count; y += 1) {
@@ -97,7 +95,7 @@ export default class QRCodeSVG extends AbstractQRCodeWithImage {
                 // will check processed items too
                 // const isBlack = intType !== TYPE_INT_WHITE;
                 // or will skip processed items
-                const isBlack = intType === TYPE_INT_BLACK;
+                const isBlack = intType === TypeInt.BLACK;
 
                 if (isBlack && begX === -1) {
                     begX = x;
@@ -117,7 +115,7 @@ export default class QRCodeSVG extends AbstractQRCodeWithImage {
         return rects;
     }
 
-    _processRect(dataInt: DataIntType, begX: number, endX: number, begY: number): ?RectType {
+    protected _processRect(dataInt: DataIntType, begX: number, endX: number, begY: number): RectInf | null {
         const count = dataInt.length - 1;
         let isNewRect = false;
         let isStopped = false;
@@ -127,7 +125,7 @@ export default class QRCodeSVG extends AbstractQRCodeWithImage {
 
             for (let x = begX; x <= endX; x += 1) {
                 const intType = dataInt[y][x];
-                if (intType === TYPE_INT_WHITE) {
+                if (intType === TypeInt.WHITE) {
                     isStopped = true;
                     break;
                 }
@@ -138,9 +136,9 @@ export default class QRCodeSVG extends AbstractQRCodeWithImage {
             }
 
             for (let x = begX; x <= endX; x += 1) {
-                if (dataInt[y][x] === TYPE_INT_BLACK) {
+                if (dataInt[y][x] === TypeInt.BLACK) {
                     isNewRect = true;
-                    dataInt[y][x] = TYPE_INT_PROCESSED;
+                    dataInt[y][x] = TypeInt.PROCESSED;
                 }
             }
 
@@ -159,17 +157,17 @@ export default class QRCodeSVG extends AbstractQRCodeWithImage {
         };
     }
 
-    _getRelativeRects(): ?RectType[] {
+    protected _getRelativeRects(): RectInf[] | null {
         const rects = this._getRects();
         if (!rects) {
             return null;
         }
-        const relativeRects: RectType[] = [];
+        const relativeRects: RectInf[] = [];
 
-        const rectsMap: Object<string, RectsMapItemType> = {};
+        const rectsMap: { [key: string]: RectsMapItemInf} = {};
         let seqRectId = 0;
 
-        rects.forEach((rect: RectType) => {
+        rects.forEach((rect: RectInf) => {
             const key = `${rect.width}:${rect.height}`;
             if (rectsMap[key]) {
                 rectsMap[key].count += 1;
@@ -178,13 +176,13 @@ export default class QRCodeSVG extends AbstractQRCodeWithImage {
                     seqRectId += 1;
                 }
             } else {
-                rectsMap[key] = { count: 1, rect, relative: false, id: null };
+                rectsMap[key] = { count: 1, rect, relative: false };
             }
         });
 
-        rects.forEach((rect: RectType) => {
+        rects.forEach((rect: RectInf) => {
             const key = `${rect.width}:${rect.height}`;
-            const rectsMapItem: RectsMapItemType = rectsMap[key];
+            const rectsMapItem: RectsMapItemInf = rectsMap[key];
             if (rectsMapItem.relative) {
                 relativeRects.push({
                     id: rectsMapItem.id,
@@ -203,22 +201,23 @@ export default class QRCodeSVG extends AbstractQRCodeWithImage {
         return relativeRects;
     }
 
-    _buildSVG(rects: RectType[]): string {
+    protected _buildSVG(rects: RectInf[]): string {
         const size = this.getDataSize();
         const tags = [
             '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" '
             + `shape-rendering="crispEdges" viewBox="0 0 ${size} ${size}">`,
         ];
 
-        if (this.bgColor) {
-            tags.push(`<rect x="0" y="0" height="${size}" width="${size}" fill="${this.bgColor}"/>`);
+        if (this._bgColor) {
+            tags.push(`<rect x="0" y="0" height="${size}" width="${size}" fill="${this._bgColor}"/>`);
         }
 
-        rects.forEach((rect: RectType) => {
+        rects.forEach((rect: RectInf) => {
             if (rect.width && rect.height) {
                 const rectId = rect.id ? `id="${rect.id}" ` : '';
                 tags.push(
-                    `<rect ${rectId}x="${rect.x}" y="${rect.y}" height="${rect.height}" width="${rect.width}" fill="${this.fgColor}"/>`,
+                    // eslint-disable-next-line max-len
+                    `<rect ${rectId}x="${rect.x}" y="${rect.y}" height="${rect.height}" width="${rect.width}" fill="${this._fgColor}"/>`,
                 );
             } else {
                 tags.push(
@@ -227,9 +226,12 @@ export default class QRCodeSVG extends AbstractQRCodeWithImage {
             }
         });
 
-        const imageConfig: ImageConfigType = this._getImageConfig();
+        const imageConfig = this._getImageCompiledConfig();
         if (imageConfig && imageConfig.width && imageConfig.height) {
-            tags.push(`<image xlink:href="${imageConfig.source}" x="${imageConfig.x}" y="${imageConfig.y}" width="${imageConfig.width}" height="${imageConfig.height}"/>`);
+            tags.push(
+                // eslint-disable-next-line max-len
+                `<image xlink:href="${imageConfig.source}" x="${imageConfig.x}" y="${imageConfig.y}" width="${imageConfig.width}" height="${imageConfig.height}"/>`,
+            );
         }
 
         tags.push('</svg>');
@@ -237,7 +239,7 @@ export default class QRCodeSVG extends AbstractQRCodeWithImage {
     }
 
     toString(): null | string {
-        if (!this.qrCodeSVG) {
+        if (!this._qrCodeSVG) {
             const dataSize = this.getDataSize();
             if (!dataSize) {
                 return null;
@@ -248,14 +250,14 @@ export default class QRCodeSVG extends AbstractQRCodeWithImage {
                 return null;
             }
 
-            this.qrCodeSVG = this._buildSVG(rects);
+            this._qrCodeSVG = this._buildSVG(rects);
         }
 
-        return this.qrCodeSVG;
+        return this._qrCodeSVG;
     }
 
     toDataUrl(): null | string {
-        if (!this.qrCodeDataUrl) {
+        if (!this._qrCodeDataUrl) {
             const dataSize = this.getDataSize();
             if (!dataSize) {
                 return null;
@@ -268,10 +270,10 @@ export default class QRCodeSVG extends AbstractQRCodeWithImage {
 
             // svg based on relative rects has min 20% less length
             const svg = this._buildSVG(relativeRects);
-            this.qrCodeDataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
+            this._qrCodeDataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
         }
 
-        return this.qrCodeDataUrl;
+        return this._qrCodeDataUrl;
     }
 
 }

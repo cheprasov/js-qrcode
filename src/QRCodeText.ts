@@ -1,4 +1,3 @@
-// @flow
 /*
  * This file is part of QR code library
  * git: https://github.com/cheprasov/js-qrcode
@@ -10,9 +9,9 @@
  */
 
 import QRCodeRaw from './QRCodeRaw';
-import type { OptionsType as ParentOptionsType } from './QRCodeRaw';
+import type { OptionsInf as ParentOptionsInf } from './QRCodeRaw';
 
-export type OptionsType = ParentOptionsType & {
+export interface OptionsInf extends ParentOptionsInf {
     blackSymbol: string,
     whiteSymbol: string,
 }
@@ -24,26 +23,34 @@ const DEFAULT_OPTIONS = {
 
 export default class QRCodeText extends QRCodeRaw {
 
-    blackSymbol: string;
-    whiteSymbol: string;
-    qrCodeText: ?string = null;
+    protected _blackSymbol: string;
+    protected _whiteSymbol: string;
+    protected _qrCodeText: string | null = null;
 
-    constructor(value: string, options: OptionsType = {}) {
+    constructor(value: string, options: Partial<OptionsInf> = {}) {
         super(value, options);
         const params = { ...DEFAULT_OPTIONS, ...options };
 
-        this.blackSymbol = params.blackSymbol;
-        this.whiteSymbol = params.whiteSymbol;
+        this._blackSymbol = params.blackSymbol;
+        this._whiteSymbol = params.whiteSymbol;
     }
 
-    _clearCache(): void {
+    protected _clearCache(): void {
         super._clearCache();
-        this.qrCodeText = null;
+        this._qrCodeText = null;
+    }
+
+    getBlackSymbol(): string {
+        return this._blackSymbol;
+    }
+
+    getWhiteSymbol(): string {
+        return this._whiteSymbol;
     }
 
     toString(): null | string {
-        if (this.qrCodeText) {
-            return this.qrCodeText;
+        if (this._qrCodeText) {
+            return this._qrCodeText;
         }
 
         const dataSize = this.getDataSize();
@@ -52,17 +59,20 @@ export default class QRCodeText extends QRCodeRaw {
         }
 
         const data = this.getData();
+        if (!data) {
+            return null;
+        }
         const symbols = [];
 
         for (let y = 0; y < dataSize; y += 1) {
             for (let x = 0; x < dataSize; x += 1) {
                 const isBlack = data[y][x];
-                symbols.push(isBlack ? this.blackSymbol : this.whiteSymbol);
+                symbols.push(isBlack ? this._blackSymbol : this._whiteSymbol);
             }
             symbols.push('\n');
         }
-        this.qrCodeText = symbols.join('');
-        return this.qrCodeText;
+        this._qrCodeText = symbols.join('');
+        return this._qrCodeText;
     }
 
 }

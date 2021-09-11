@@ -8,8 +8,28 @@
  * file that was distributed with this source code.
  */
 
+// @ts-ignore
+import QRCodeCore from 'qr.js/lib/QRCode';
 import QRCodeRaw, { QRCodeDataType } from './QRCodeRaw';
 import { ErrorCorrectionLevelEnum } from "./ErrorCorrectionLevelEnum";
+
+jest.mock('qr.js/lib/QRCode', () => {
+    return class {
+
+        modules: boolean[][] | null = null;
+
+        make() {
+            this.modules = [[true, true], [false, false]];
+        }
+
+        addData = (value: string) => {
+            if (value === 'bad') {
+                throw new Error('Some error');
+            }
+        }
+
+    }
+});
 
 describe('QRCodeRaw', () => {
 
@@ -211,45 +231,43 @@ describe('QRCodeRaw', () => {
         });
     });
 
-    // describe('getData', () => {
-    //     let qrCode;
-    //
-    //     beforeEach(() => {
-    //         qrCode = new QRCodeRaw('test', { padding: 0 });
-    //     });
-    //
-    //     it('should return cached data', () => {
-    //         qrCode.qrCodeData = [1, 2, 3, 4];
-    //         expect(qrCode.getData()).toEqual([1, 2, 3, 4]);
-    //     });
-    //
-    //     it('should throw an error on error if errorsEnable is true', () => {
-    //         qrCode.errorsEnabled = true;
-    //         mockQRCode = {
-    //             addData: () => {
-    //                 throw new Error('Some error');
-    //             },
-    //         };
-    //         expect(() => { qrCode.getData(); }).toThrowError();
-    //     });
-    //
-    //     it('should return null on error if errorsEnable is false', () => {
-    //         mockQRCode = {
-    //             addData: () => {
-    //                 throw new Error('Some error');
-    //             },
-    //         };
-    //         expect(qrCode.getData()).toBeNull();
-    //     });
-    //
-    //     it('should return data of QR code', () => {
-    //         mockQRCode = {
-    //             addData: jest.fn(),
-    //             make: jest.fn(),
-    //             modules: [[true, true, true], [true, false, true], [true, true, true]],
-    //         };
-    //         expect(qrCode.getData()).toEqual([[true, true, true], [true, false, true], [true, true, true]]);
-    //     });
-    // });
+    describe('getData', () => {
+        class TestClass extends QRCodeRaw {
+
+            setQrCodeData(data: QRCodeDataType | null) {
+                return this._qrCodeData = data;
+            }
+
+            getQrCodeData() {
+                return this._qrCodeData;
+            }
+
+        }
+        let qrCode: TestClass;
+
+        beforeEach(() => {
+            qrCode = new TestClass('test', { padding: 0 });
+        });
+
+        it('should return cached data', () => {
+            qrCode.setQrCodeData([[true, true], [false, false]]);
+            expect(qrCode.getData()).toEqual([[true, true], [false, false]]);
+        });
+
+        it('should throw an error on error if errorsEnable is true', () => {
+            qrCode = new TestClass('bad', { padding: 0, errorsEnabled: true });
+            expect(() => { qrCode.getData(); }).toThrowError();
+        });
+
+        it('should return null on error if errorsEnable is false', () => {
+            qrCode = new TestClass('bad', { padding: 0, errorsEnabled: false });
+            expect(qrCode.getData()).toBeNull();
+        });
+
+        it('should return data of QR code', () => {
+            qrCode = new TestClass('good', { padding: 0 });
+            expect(qrCode.getData()).toEqual([[true, true], [false, false]]);
+        });
+    });
 
 });

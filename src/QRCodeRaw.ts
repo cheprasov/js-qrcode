@@ -14,7 +14,7 @@ import QRCodeCore from 'qr.js/lib/QRCode';
 import ErrorCorrectLevel from 'qr.js/lib/ErrorCorrectLevel';
 import { ErrorCorrectionLevelEnum } from "./ErrorCorrectionLevelEnum";
 
-export interface OptionsType {
+export interface OptionsInf {
     level: ErrorCorrectionLevelEnum,
     typeNumber: number,
     padding: number,
@@ -24,7 +24,7 @@ export interface OptionsType {
 
 export type QRCodeDataType = boolean[][];
 
-const DEFAULT_CONSTRUCTOR_PARAMS: OptionsType = {
+const DEFAULT_CONSTRUCTOR_PARAMS: OptionsInf = {
     level: ErrorCorrectionLevelEnum.LOW,
     padding: 1,
     invert: false,
@@ -43,7 +43,7 @@ export default class QRCodeRaw {
 
     protected _qrCodeData: QRCodeDataType | null = null;
 
-    constructor(value: string, options: Partial<OptionsType> = {}) {
+    constructor(value: string, options: Partial<OptionsInf> = {}) {
         const params = { ...DEFAULT_CONSTRUCTOR_PARAMS, ...options };
 
         this._value = value;

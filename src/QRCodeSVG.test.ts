@@ -43,8 +43,8 @@ describe('QRCodeSVG', () => {
             expect(qrCode._typeNumber).toEqual(0);
             expect(qrCode._areErrorsEnabled).toBeFalsy();
             expect(qrCode._isInvert).toBeFalsy();
-            expect(qrCode.fgColor).toEqual('#000');
-            expect(qrCode.bgColor).toEqual('#FFF');
+            expect(qrCode._fgColor).toEqual('#000');
+            expect(qrCode._bgColor).toEqual('#FFF');
         });
 
         it('should default params for not specified params', () => {
@@ -55,8 +55,8 @@ describe('QRCodeSVG', () => {
             expect(qrCode._typeNumber).toEqual(0);
             expect(qrCode._areErrorsEnabled).toBeFalsy();
             expect(qrCode._isInvert).toBeFalsy();
-            expect(qrCode.fgColor).toEqual('#000');
-            expect(qrCode.bgColor).toEqual('#FFF');
+            expect(qrCode._fgColor).toEqual('#000');
+            expect(qrCode._bgColor).toEqual('#FFF');
         });
 
         it('should use specified params', () => {
@@ -78,8 +78,8 @@ describe('QRCodeSVG', () => {
             expect(qrCode._typeNumber).toEqual(20);
             expect(qrCode._areErrorsEnabled).toBeTruthy();
             expect(qrCode._isInvert).toBeTruthy();
-            expect(qrCode.fgColor).toEqual('#AAA');
-            expect(qrCode.bgColor).toEqual('#FFF');
+            expect(qrCode._fgColor).toEqual('#AAA');
+            expect(qrCode._bgColor).toEqual('#FFF');
         });
 
         it('should create alias toDataURL for method toDataUrl', () => {
@@ -92,11 +92,11 @@ describe('QRCodeSVG', () => {
         it('should clear qrCodeData and qrCodeText', () => {
             const qrCode = new QRCodeSVG('test');
             qrCode._qrCodeData = [1, 2, 3, 4];
-            qrCode.qrCodeSVG = '<svg />';
-            qrCode.qrCodeDataUrl = 'data:some-42';
+            qrCode._qrCodeSVG = '<svg />';
+            qrCode._qrCodeDataUrl = 'data:some-42';
             qrCode._clearCache();
             expect(qrCode._qrCodeData).toBeNull();
-            expect(qrCode.qrCodeDataUrl).toBeNull();
+            expect(qrCode._qrCodeDataUrl).toBeNull();
         });
     });
 
@@ -1038,7 +1038,7 @@ describe('QRCodeSVG', () => {
         it('should return cached QR code', () => {
             const qrCode = new QRCodeSVG('test');
             qrCode._buildSVG = jest.fn();
-            qrCode.qrCodeSVG = '<svg><qrcode /></svg>';
+            qrCode._qrCodeSVG = '<svg><qrcode /></svg>';
             expect(qrCode.toString()).toEqual('<svg><qrcode /></svg>');
             expect(qrCode._buildSVG).not.toHaveBeenCalled();
         });
@@ -1143,7 +1143,7 @@ describe('QRCodeSVG', () => {
         it('should return cached QR code dataUrl', () => {
             const qrCode = new QRCodeSVG('test');
             qrCode._buildSVG = jest.fn();
-            qrCode.qrCodeDataUrl = 'data:image/svg+xml;base64,<svg><qrcode /></svg>';
+            qrCode._qrCodeDataUrl = 'data:image/svg+xml;base64,<svg><qrcode /></svg>';
             expect(qrCode.toDataUrl()).toEqual('data:image/svg+xml;base64,<svg><qrcode /></svg>');
             expect(qrCode._buildSVG).not.toHaveBeenCalled();
         });

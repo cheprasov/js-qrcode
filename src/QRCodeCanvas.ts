@@ -9,17 +9,17 @@
  * file that was distributed with this source code.
  */
 
-import type { OptionsType as ParentOptionsType, QRCodeDataType } from './QRCodeRaw';
-import ColorUtils from './utils/ColorUtils';
-import type { ImageConfigType } from './AbstractQRCodeWithImage';
+import type { OptionsInf as ParentOptionsInf, QRCodeDataType } from './QRCodeRaw';
+import ColorUtils from './color/ColorUtils';
+import type { ImageConfigInf } from './AbstractQRCodeWithImage';
 import AbstractQRCodeWithImage from './AbstractQRCodeWithImage';
 import ImageLoader from './loader/ImageLoader';
 
-export type OptionsType = ParentOptionsType & {
-    fgColor?: string,
-    bgColor?: ?string,
-    scale?: number,
-    size?: number,
+export interface OptionsType extends ParentOptionsInf {
+    fgColor: string,
+    bgColor: string,
+    scale: number,
+    size: number,
 }
 
 const DEFAULT_OPTIONS = {
@@ -31,61 +31,59 @@ const DEFAULT_OPTIONS = {
 
 export default class QRCodeCanvas extends AbstractQRCodeWithImage {
 
-    fgColor: string;
-    bgColor: string;
-    scale: number;
-    size: ?number;
+    protected _fgColor: string;
+    protected _bgColor: string;
+    protected _scale: number;
+    protected _size: number | null;
 
-    canvas: HTMLCanvasElement;
-    canvasContext: CanvasRenderingContext2D;
+    protected _canvas: HTMLCanvasElement;
+    protected _canvasContext: CanvasRenderingContext2D;
 
-    constructor(value: string, options: OptionsType = {}) {
+    constructor(value: string, options: Partial<OptionsType> = {}) {
         super(value, options);
         const params = { ...DEFAULT_OPTIONS, ...options };
 
-        this.fgColor = params.fgColor;
-        this.bgColor = params.bgColor;
-        this.scale = params.scale;
-        this.size = params.size;
+        this._fgColor = params.fgColor;
+        this._bgColor = params.bgColor;
+        this._scale = params.scale;
+        this._size = params.size;
 
-        this.canvas = document.createElement('canvas');
-        this.canvasContext = this.canvas.getContext('2d');
-
-        this.toDataURL = this.toDataUrl;
+        this._canvas = document.createElement('canvas');
+        this._canvasContext = this._canvas.getContext('2d') as CanvasRenderingContext2D;
     }
 
     _clearCache(): void {
         super._clearCache();
-        this.canvas.width = 0;
+        this._canvas.width = 0;
     }
 
-    _getCanvasSize(): ?number {
+    _getCanvasSize(): number | null {
         const dataSize = this.getDataSize();
         if (!dataSize) {
             return null;
         }
-        if (this.size) {
-            return this.size;
+        if (this._size) {
+            return this._size;
         }
-        if (this.scale) {
-            return this.scale * dataSize;
+        if (this._scale) {
+            return this._scale * dataSize;
         }
         return dataSize;
     }
 
-    draw(canvas: ?HTMLCanvasElement = null): null | HTMLCanvasElement | Promise {
+    draw(canvas: HTMLCanvasElement | null = null): HTMLCanvasElement | Promise | null {
         const dataSize = this.getDataSize();
         if (!dataSize) {
             return null;
         }
 
-        const data: ?QRCodeDataType = this.getData();
+        const data: QRCodeDataType | null = this.getData();
         if (!data) {
             return null;
         }
 
-        const fgColor = ColorUtils.convertHexColorToBytes(this.fgColor);
-        const bgColor = ColorUtils.convertHexColorToBytes(this.bgColor);
+        const fgColor = ColorUtils.convertHexColorToBytes(this._fgColor);
+        const bgColor = ColorUtils.convertHexColorToBytes(this._bgColor);
 
         let index = 0;
         const bytes = new Uint8ClampedArray((dataSize ** 2) * 4);
@@ -102,19 +100,19 @@ export default class QRCodeCanvas extends AbstractQRCodeWithImage {
 
         const imageData = new ImageData(bytes, dataSize, dataSize);
 
-        this.canvas.width = dataSize;
-        this.canvas.height = dataSize;
-        this.canvasContext.putImageData(imageData, 0, 0);
+        this._canvas.width = dataSize;
+        this._canvas.height = dataSize;
+        this._canvasContext.putImageData(imageData, 0, 0);
 
-        const canvasSize = this._getCanvasSize();
+        const canvasSize = this._getCanvasSize() || 0;
 
         const qrCodeCanvas = canvas || document.createElement('canvas');
         qrCodeCanvas.width = canvasSize;
         qrCodeCanvas.height = canvasSize;
 
-        const qrCodeCanvasContext = qrCodeCanvas.getContext('2d');
+        const qrCodeCanvasContext = qrCodeCanvas.getContext('2d') as CanvasRenderingContext2D;
         qrCodeCanvasContext.imageSmoothingEnabled = false;
-        qrCodeCanvasContext.drawImage(this.canvas, 0, 0, canvasSize, canvasSize);
+        qrCodeCanvasContext.drawImage(this._canvas, 0, 0, canvasSize, canvasSize);
 
         const drawImageResult = this._drawImage(qrCodeCanvasContext, canvasSize / dataSize);
         if (drawImageResult instanceof Promise) {
@@ -125,16 +123,16 @@ export default class QRCodeCanvas extends AbstractQRCodeWithImage {
         return qrCodeCanvas;
     }
 
-    _getImageSource(imageConfig: ImageConfigType): null | Image | HTMLCanvasElement | Promise {
+    _getImageSource(imageConfig: ImageConfigInf): null | HTMLImageElement | HTMLCanvasElement | Promise {
         const source = imageConfig.source;
         if (typeof source === 'string') {
-            return ImageLoader.load(source).then((image: Image) => {
-                this.image.source = image;
+            return ImageLoader.load(source).then((image: HTMLImageElement) => {
+                this._imageConfig.source = image;
                 imageConfig.source = image;
                 return image;
             });
         }
-        if (source instanceof Image) {
+        if (source instanceof Image || source instanceof HTMLImageElement) {
             return source;
         }
         if (source instanceof HTMLCanvasElement) {
@@ -143,14 +141,14 @@ export default class QRCodeCanvas extends AbstractQRCodeWithImage {
         return null;
     }
 
-    _drawImage(qrCodeCanvasContext: HTMLCanvasElement, pixelSize: number): null | true | Promise {
-        const imageConfig: ImageConfigType = this._getImageConfig();
+    _drawImage(qrCodeCanvasContext: CanvasRenderingContext2D, pixelSize: number): null | true | Promise {
+        const imageConfig = this._getImageCompiledConfig();
         if (!imageConfig) {
             return null;
         }
 
         if (imageConfig.source instanceof Promise) {
-            return imageConfig.source.then((image: Image) => {
+            return imageConfig.source.then((image: HTMLImageElement) => {
                 qrCodeCanvasContext.drawImage(
                     image,
                     imageConfig.x * pixelSize,
