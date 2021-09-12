@@ -1,5 +1,4 @@
 import { ImageInf } from "./ImageInf";
-import { Image } from "canvas";
 
 export const isImageDefined = (): boolean => {
     if (typeof Image !== 'undefined') {

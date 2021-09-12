@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-import QRCodeRaw from './QRCodeRaw';
+import AbstractQRCodeWithFgBgColors from "./AbstractQRCodeWithFgBgColors";
 import DimensionUtils from './dimension/DimensionUtils';
 import { isImage, isImageDefined } from "./image/ImageUtils";
 import { isCanvas, isCanvasDefined } from "./canvas/CanvasUtils";
@@ -17,9 +17,8 @@ import type { OptionsInf as ParentOptionsInf, QRCodeDataType } from './QRCodeRaw
 import type { ImageInf } from "./image/ImageInf";
 import type { CanvasInf } from "./canvas/CanvasInf";
 import type { Nullable } from "./type/Nullable";
-import { ImageConstructorInf } from "./image/ImageConstructorInf";
-import { CanvasConstructorInf } from "./canvas/CanvasConstructorInf";
-import { Image } from "canvas";
+import type { ImageConstructorInf } from "./image/ImageConstructorInf";
+import type { CanvasConstructorInf } from "./canvas/CanvasConstructorInf";
 
 export interface ImageConfigInf {
     source: string | ImageInf | CanvasInf,
@@ -58,7 +57,7 @@ const DEFAULT_OPTIONS = {
 
 const DEFAULT_IMAGE_BORDER = 1;
 
-export default abstract class AbstractQRCodeWithImage extends QRCodeRaw {
+export default abstract class AbstractQRCodeWithImage extends AbstractQRCodeWithFgBgColors {
 
     protected _imageConfig: Nullable<ImageConfigInf>;
     protected _imageConstructor: Nullable<ImageConstructorInf>;

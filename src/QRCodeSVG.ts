@@ -8,8 +8,8 @@
  * file that was distributed with this source code.
  */
 
-import type { OptionsInf as ParentOptionsType } from './QRCodeRaw';
 import AbstractQRCodeWithImage from './AbstractQRCodeWithImage';
+import { base64Encode } from "./encoder/base64";
 
 enum TypeInt {
     WHITE = 0,
@@ -34,30 +34,10 @@ interface RectsMapItemInf {
     id?: string,
 }
 
-export interface OptionsInf extends ParentOptionsType {
-    fgColor: string,
-    bgColor: string,
-}
-
-const DEFAULT_OPTIONS = {
-    fgColor: '#000',
-    bgColor: '#FFF',
-};
-
 export default class QRCodeSVG extends AbstractQRCodeWithImage {
 
-    protected _fgColor: string;
-    protected _bgColor: string;
     protected _qrCodeSVG: string | null = null;
     protected _qrCodeDataUrl: string | null = null;
-
-    constructor(value: string, options: Partial<OptionsInf> = {}) {
-        super(value, options);
-        const params = { ...DEFAULT_OPTIONS, ...options };
-
-        this._fgColor = params.fgColor;
-        this._bgColor = params.bgColor;
-    }
 
     protected _clearCache(): void {
         super._clearCache();
@@ -270,7 +250,7 @@ export default class QRCodeSVG extends AbstractQRCodeWithImage {
 
             // svg based on relative rects has min 20% less length
             const svg = this._buildSVG(relativeRects);
-            this._qrCodeDataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
+            this._qrCodeDataUrl = `data:image/svg+xml;base64,${base64Encode(svg)}`;
         }
 
         return this._qrCodeDataUrl;
