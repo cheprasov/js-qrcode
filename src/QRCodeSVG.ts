@@ -8,8 +8,11 @@
  * file that was distributed with this source code.
  */
 
-import AbstractQRCodeWithImage from './AbstractQRCodeWithImage';
+import AbstractQRCodeWithImage, { ImageConfigInf } from './AbstractQRCodeWithImage';
 import { base64Encode } from "./encoder/base64";
+import { isImage } from "./image/ImageUtils";
+import { isCanvas } from "./canvas/CanvasUtils";
+import RectProcessor from './geometry/rect/RectProcessor';
 
 enum TypeInt {
     WHITE = 0,
@@ -34,151 +37,29 @@ interface RectsMapItemInf {
     id?: string,
 }
 
-export default class QRCodeSVG extends AbstractQRCodeWithImage {
+export default class QRCodeSVG extends AbstractQRCodeWithImage<string> {
 
     protected _qrCodeSVG: string | null = null;
     protected _qrCodeDataUrl: string | null = null;
+
+    protected _getImageSource(imageConfig: ImageConfigInf): string | null {
+        const source = imageConfig.source;
+        if (typeof source === 'string') {
+            return source;
+        }
+        if (isImage(source)) {
+            return source.src;
+        }
+        if (isCanvas(source)) {
+            return source.toDataURL();
+        }
+        return null;
+    }
 
     protected _clearCache(): void {
         super._clearCache();
         this._qrCodeSVG = null;
         this._qrCodeDataUrl = null;
-    }
-
-    protected _getDataInt(): DataIntType | null {
-        const data = this.getData();
-        if (!data) {
-            return null;
-        }
-        // copy boolean[][] to number[][]
-        return data.map((row) => {
-            return row.map((isBlack) => {
-                return isBlack ? TypeInt.BLACK : TypeInt.WHITE;
-            });
-        });
-    }
-
-    protected _getRects(): RectInf[] | null {
-        const dataInt = this._getDataInt();
-        if (!dataInt) {
-            return null;
-        }
-
-        const rects: RectInf[] = [];
-        const count = dataInt.length - 1;
-
-        for (let y = 0; y <= count; y += 1) {
-            let begX = -1;
-            for (let x = 0; x <= count; x += 1) {
-                const intType = dataInt[y][x];
-                const isLast = x === count;
-                // will check processed items too
-                // const isBlack = intType !== TYPE_INT_WHITE;
-                // or will skip processed items
-                const isBlack = intType === TypeInt.BLACK;
-
-                if (isBlack && begX === -1) {
-                    begX = x;
-                }
-
-                if (begX !== -1 && (isLast || !isBlack)) {
-                    const endX = x - (isBlack ? 0 : 1);
-                    const rect = this._processRect(dataInt, begX, endX, y);
-                    if (rect) {
-                        rects.push(rect);
-                    }
-                    begX = -1;
-                }
-            }
-        }
-
-        return rects;
-    }
-
-    protected _processRect(dataInt: DataIntType, begX: number, endX: number, begY: number): RectInf | null {
-        const count = dataInt.length - 1;
-        let isNewRect = false;
-        let isStopped = false;
-        let height = 0;
-
-        for (let y = begY; y <= count; y += 1) {
-
-            for (let x = begX; x <= endX; x += 1) {
-                const intType = dataInt[y][x];
-                if (intType === TypeInt.WHITE) {
-                    isStopped = true;
-                    break;
-                }
-            }
-
-            if (isStopped) {
-                break;
-            }
-
-            for (let x = begX; x <= endX; x += 1) {
-                if (dataInt[y][x] === TypeInt.BLACK) {
-                    isNewRect = true;
-                    dataInt[y][x] = TypeInt.PROCESSED;
-                }
-            }
-
-            height += 1;
-        }
-
-        if (!isNewRect) {
-            return null;
-        }
-
-        return {
-            x: begX,
-            y: begY,
-            width: endX - begX + 1,
-            height,
-        };
-    }
-
-    protected _getRelativeRects(): RectInf[] | null {
-        const rects = this._getRects();
-        if (!rects) {
-            return null;
-        }
-        const relativeRects: RectInf[] = [];
-
-        const rectsMap: { [key: string]: RectsMapItemInf} = {};
-        let seqRectId = 0;
-
-        rects.forEach((rect: RectInf) => {
-            const key = `${rect.width}:${rect.height}`;
-            if (rectsMap[key]) {
-                rectsMap[key].count += 1;
-                if (!rectsMap[key].id) {
-                    rectsMap[key].id = `i${seqRectId.toString(32)}`;
-                    seqRectId += 1;
-                }
-            } else {
-                rectsMap[key] = { count: 1, rect, relative: false };
-            }
-        });
-
-        rects.forEach((rect: RectInf) => {
-            const key = `${rect.width}:${rect.height}`;
-            const rectsMapItem: RectsMapItemInf = rectsMap[key];
-            if (rectsMapItem.relative) {
-                relativeRects.push({
-                    id: rectsMapItem.id,
-                    x: rect.x - rectsMapItem.rect.x,
-                    y: rect.y - rectsMapItem.rect.y,
-                });
-            } else {
-                if (rectsMapItem.id) {
-                    rect.id = rectsMapItem.id;
-                    rectsMapItem.relative = true;
-                }
-                relativeRects.push(rect);
-            }
-        });
-
-        return relativeRects;
     }
 
     protected _buildSVG(rects: RectInf[]): string {
@@ -225,7 +106,7 @@ export default class QRCodeSVG extends AbstractQRCodeWithImage {
                 return null;
             }
 
-            const rects = this._getRects();
+            const rects = RectProcessor.getRects(this.getData());
             if (!rects) {
                 return null;
             }
@@ -243,7 +124,7 @@ export default class QRCodeSVG extends AbstractQRCodeWithImage {
                 return null;
             }
 
-            const relativeRects = this._getRelativeRects();
+            const relativeRects = RectProcessor.getRelativeRects(this.getData());
             if (!relativeRects) {
                 return null;
             }

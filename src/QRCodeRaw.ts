@@ -13,6 +13,7 @@ import QRCodeCore from 'qr.js/lib/QRCode';
 // @ts-ignore
 import ErrorCorrectLevel from 'qr.js/lib/ErrorCorrectLevel';
 import { ErrorCorrectionLevelEnum } from "./ErrorCorrectionLevelEnum";
+import type { QRCodeDataType } from './type/QRCodeDataType';
 
 export interface OptionsInf {
     level: ErrorCorrectionLevelEnum,
@@ -21,8 +22,6 @@ export interface OptionsInf {
     invert: boolean,
     errorsEnabled: boolean,
 }
-
-export type QRCodeDataType = boolean[][];
 
 const DEFAULT_CONSTRUCTOR_PARAMS: OptionsInf = {
     level: ErrorCorrectionLevelEnum.LOW,

@@ -8,6 +8,7 @@
  * file that was distributed with this source code.
  */
 // @ts-nocheck
+
 import QRCodeCanvas from './QRCodeCanvas';
 
 global.ImageData = function (bytes, width, height) {

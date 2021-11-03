@@ -9,11 +9,13 @@
  * file that was distributed with this source code.
  */
 
+import { ImageInf } from "../image/ImageInf";
+
 export default class ImageLoader {
 
-    static load(url: string): Promise<HTMLImageElement> {
+    static load(imageConstructor: new () => ImageInf, url: string): Promise<ImageInf> {
         return new Promise((resolve, reject) => {
-            const img = new Image();
+            const img = new imageConstructor();
             img.onload = () => resolve(img);
             img.onerror = () => reject(img);
             img.src = url;

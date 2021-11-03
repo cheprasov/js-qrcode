@@ -29,8 +29,8 @@ export interface ImageConfigInf {
     border?: number | null,
 }
 
-export interface ImageCompiledConfigInf {
-    source: string,
+export interface ImageCompiledConfigInf<T> {
+    source: T,
     width: number,
     height: number,
     x: number,
@@ -46,24 +46,28 @@ export interface OptionsInf extends ParentOptionsInf {
 
 const DEFAULT_OPTIONS = {
     image: null,
-    imageConstructor: isImageDefined() ? function (...args: any[]) {
+    imageConstructor: isImageDefined() ? function(...args: any[]) {
         // @ts-ignore
         return new Image(...args);
-    } as unknown as ImageConstructorInf : null,
-    canvasConstructor: isCanvasDefined() && (typeof document !== 'undefined') ? function () {
+    } as unknown as ImageConstructorInf : function() {
+        throw new Error('Constructor for Image is not found');
+    } as unknown as ImageConstructorInf,
+    canvasConstructor: isCanvasDefined() && (typeof document !== 'undefined') ? function() {
         return document.createElement('canvas');
-    } as unknown as CanvasConstructorInf  : null,
+    } as unknown as CanvasConstructorInf : function() {
+        throw new Error('Constructor for Canvas is not found');
+    } as unknown as CanvasConstructorInf,
 };
 
 const DEFAULT_IMAGE_BORDER = 1;
 
-export default abstract class AbstractQRCodeWithImage extends AbstractQRCodeWithFgBgColors {
+export default abstract class AbstractQRCodeWithImage<T> extends AbstractQRCodeWithFgBgColors {
 
     protected _imageConfig: Nullable<ImageConfigInf>;
-    protected _imageConstructor: Nullable<ImageConstructorInf>;
-    protected _canvasConstructor: Nullable<CanvasConstructorInf>;
+    protected _imageConstructor: ImageConstructorInf;
+    protected _canvasConstructor: CanvasConstructorInf;
 
-    protected _imageCompiledConfig: Nullable<ImageCompiledConfigInf> = null;
+    protected _imageCompiledConfig: Nullable<ImageCompiledConfigInf<T>> = null;
 
     constructor(value: string, options: Partial<OptionsInf> = {}) {
         super(value, options);
@@ -79,21 +83,9 @@ export default abstract class AbstractQRCodeWithImage extends AbstractQRCodeWith
         this._imageCompiledConfig = null;
     }
 
-    protected _getImageSource(imageConfig: ImageConfigInf): string | null {
-        const source = imageConfig.source;
-        if (typeof source === 'string') {
-            return source;
-        }
-        if (isImage(source)) {
-            return source.src;
-        }
-        if (isCanvas(source)) {
-            return source.toDataURL();
-        }
-        return null;
-    }
+    protected abstract _getImageSource(imageConfig: ImageConfigInf): T | null;
 
-    protected _getImageCompiledConfig(): ImageCompiledConfigInf | null {
+    protected _getImageCompiledConfig(): ImageCompiledConfigInf<T> | null {
         if (this._imageCompiledConfig) {
             return this._imageCompiledConfig;
         }

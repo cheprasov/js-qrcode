@@ -14,6 +14,8 @@ import ColorUtils from './color/ColorUtils';
 import type { ImageConfigInf } from './AbstractQRCodeWithImage';
 import AbstractQRCodeWithImage from './AbstractQRCodeWithImage';
 import ImageLoader from './loader/ImageLoader';
+import { CanvasInf } from "./canvas/CanvasInf";
+import { ImageInf } from "./image/ImageInf";
 
 export interface OptionsType extends ParentOptionsInf {
     fgColor: string,
@@ -29,10 +31,8 @@ const DEFAULT_OPTIONS = {
     size: null,
 };
 
-export default class QRCodeCanvas extends AbstractQRCodeWithImage {
+export default class QRCodeCanvas extends AbstractQRCodeWithImage<ImageInf | CanvasInf | Promise<ImageInf>> {
 
-    protected _fgColor: string;
-    protected _bgColor: string;
     protected _scale: number;
     protected _size: number | null;
 
@@ -43,8 +43,6 @@ export default class QRCodeCanvas extends AbstractQRCodeWithImage {
         super(value, options);
         const params = { ...DEFAULT_OPTIONS, ...options };
 
-        this._fgColor = params.fgColor;
-        this._bgColor = params.bgColor;
         this._scale = params.scale;
         this._size = params.size;
 
@@ -71,7 +69,7 @@ export default class QRCodeCanvas extends AbstractQRCodeWithImage {
         return dataSize;
     }
 
-    draw(canvas: HTMLCanvasElement | null = null): HTMLCanvasElement | Promise | null {
+    draw(canvas: HTMLCanvasElement | null = null): HTMLCanvasElement | Promise<CanvasInf> | null {
         const dataSize = this.getDataSize();
         if (!dataSize) {
             return null;
@@ -123,13 +121,15 @@ export default class QRCodeCanvas extends AbstractQRCodeWithImage {
         return qrCodeCanvas;
     }
 
-    _getImageSource(imageConfig: ImageConfigInf): null | HTMLImageElement | HTMLCanvasElement | Promise {
+    _getImageSource(imageConfig: ImageConfigInf): null | ImageInf | CanvasInf | Promise<ImageInf> {
         const source = imageConfig.source;
         if (typeof source === 'string') {
-            return ImageLoader.load(source).then((image: HTMLImageElement) => {
+            return ImageLoader.load(this._imageConstructor, source).then((image: ImageInf) => {
+                // @ts-ignore
                 this._imageConfig.source = image;
+                // @ts-ignore
                 imageConfig.source = image;
-                return image;
+                return image as ImageInf;
             });
         }
         if (source instanceof Image || source instanceof HTMLImageElement) {
@@ -141,15 +141,17 @@ export default class QRCodeCanvas extends AbstractQRCodeWithImage {
         return null;
     }
 
-    _drawImage(qrCodeCanvasContext: CanvasRenderingContext2D, pixelSize: number): null | true | Promise {
+    _drawImage(qrCodeCanvasContext: CanvasRenderingContext2D, pixelSize: number): null | true | Promise<void> {
         const imageConfig = this._getImageCompiledConfig();
         if (!imageConfig) {
             return null;
         }
 
+        // @ts-ignore
         if (imageConfig.source instanceof Promise) {
-            return imageConfig.source.then((image: HTMLImageElement) => {
+            return imageConfig.source.then((image: ImageInf) => {
                 qrCodeCanvasContext.drawImage(
+                    // @ts-ignore
                     image,
                     imageConfig.x * pixelSize,
                     imageConfig.y * pixelSize,
@@ -160,6 +162,7 @@ export default class QRCodeCanvas extends AbstractQRCodeWithImage {
         }
 
         qrCodeCanvasContext.drawImage(
+            // @ts-ignore
             imageConfig.source,
             imageConfig.x * pixelSize,
             imageConfig.y * pixelSize,
@@ -170,11 +173,11 @@ export default class QRCodeCanvas extends AbstractQRCodeWithImage {
         return true;
     }
 
-    getCanvas(): null | HTMLCanvasElement | Promise {
+    getCanvas(): null | HTMLCanvasElement | Promise<CanvasInf> {
         return this.draw();
     }
 
-    toDataUrl(type: string = 'image/png', encoderOptions: number = 0.92): null | string | Promise {
+    toDataUrl(type: string = 'image/png', encoderOptions: number = 0.92): null | string | Promise<string> {
         const canvasOrPromise = this.draw();
         if (!canvasOrPromise) {
             return null;
@@ -186,4 +189,5 @@ export default class QRCodeCanvas extends AbstractQRCodeWithImage {
         }
         return canvasOrPromise.toDataURL(type, encoderOptions);
     }
+
 }

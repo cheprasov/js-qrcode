@@ -11,9 +11,9 @@ const bufferEncode = (value: string): string => {
 
 const errorEncode = () => {
     if (typeof global !== 'undefined') {
-        throw new Error('Node.js Buffer are not defined');
+        throw new Error('Node.js Buffer is not defined');
     } else if (typeof window !== 'undefined') {
-        throw new Error('Browser "btoa" function are not defined');
+        throw new Error('Browser "btoa" function is not defined');
     }
     throw new Error('Buffer or btoa function should be defined.');
 }

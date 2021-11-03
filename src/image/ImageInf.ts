@@ -6,6 +6,7 @@ export interface ImageInf {
     width: number;
     alt: string;
     onload: Nullable<() => void>;
+    onerror: Nullable<() => void>;
     /**
      * Retrieves whether the object is fully loaded.
      */
