@@ -34,9 +34,9 @@ describe('DimensionUtils', () => {
             expect(DimensionUtils.calculateDimension('10', 42)).toEqual(10);
             expect(DimensionUtils.calculateDimension('10a', 42)).toEqual(10);
             expect(DimensionUtils.calculateDimension('10.0', 42)).toEqual(10);
-            expect(DimensionUtils.calculateDimension(true, 42)).toEqual(0);
-            expect(DimensionUtils.calculateDimension(null, 42)).toEqual(0);
-            expect(DimensionUtils.calculateDimension(undefined, 42)).toEqual(0);
+            expect(DimensionUtils.calculateDimension(true as any, 42)).toEqual(0);
+            expect(DimensionUtils.calculateDimension(null as any, 42)).toEqual(0);
+            expect(DimensionUtils.calculateDimension(undefined as any, 42)).toEqual(0);
         });
     });
 
@@ -49,10 +49,10 @@ describe('DimensionUtils', () => {
         });
 
         it('should return 0 if value is not number or string', () => {
-            expect(DimensionUtils.calculatePosition(true, 200, 400)).toEqual(0);
-            expect(DimensionUtils.calculatePosition(null, 20, 40)).toEqual(0);
-            expect(DimensionUtils.calculatePosition(false, 10, 40)).toEqual(0);
-            expect(DimensionUtils.calculatePosition(undefined, 50, 100)).toEqual(0);
+            expect(DimensionUtils.calculatePosition(true as any, 200, 400)).toEqual(0);
+            expect(DimensionUtils.calculatePosition(null as any, 20, 40)).toEqual(0);
+            expect(DimensionUtils.calculatePosition(false as any, 10, 40)).toEqual(0);
+            expect(DimensionUtils.calculatePosition(undefined as any, 50, 100)).toEqual(0);
         });
 
         it('should return 0 if value is top or left', () => {

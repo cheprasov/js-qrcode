@@ -1,4 +1,3 @@
-// @flow
 /*
  * This file is part of QR code library
  * git: https://github.com/cheprasov/js-qrcode

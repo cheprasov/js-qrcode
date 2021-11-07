@@ -10,39 +10,22 @@
  */
 
 import QRCodeText from './QRCodeText';
+import { ErrorCorrectionLevelEnum } from "./ErrorCorrectionLevelEnum";
 
 describe('QRCodeText', () => {
 
     describe('constructor', () => {
         it('should use default params if nothing is provided', () => {
-            const qrCode = new QRCodeText();
-            expect(qrCode.value).toBeUndefined();
-            expect(qrCode.padding).toEqual(1);
-            expect(qrCode.level).toEqual('L');
-            expect(qrCode.typeNumber).toEqual(0);
-            expect(qrCode.errorsEnabled).toBeFalsy();
-            expect(qrCode.invert).toBeFalsy();
-            expect(qrCode.blackSymbol).toEqual('▓▓');
-            expect(qrCode.whiteSymbol).toEqual('  ');
-        });
-
-        it('should default params for not specified params', () => {
-            const qrCode = new QRCodeText('test 42', { level: 'Q' });
-            expect(qrCode.value).toEqual('test 42');
-            expect(qrCode.padding).toEqual(1);
-            expect(qrCode.level).toEqual('Q');
-            expect(qrCode.typeNumber).toEqual(0);
-            expect(qrCode.errorsEnabled).toBeFalsy();
-            expect(qrCode.invert).toBeFalsy();
-            expect(qrCode.blackSymbol).toEqual('▓▓');
-            expect(qrCode.whiteSymbol).toEqual('  ');
+            const qrCode = new QRCodeText('');
+            expect(qrCode.getBlackSymbol()).toEqual('▓▓');
+            expect(qrCode.getWhiteSymbol()).toEqual('  ');
         });
 
         it('should use specified params', () => {
             const qrCode = new QRCodeText(
                 'test 84',
                 {
-                    level: 'H',
+                    level: ErrorCorrectionLevelEnum.HIGH,
                     padding: 0,
                     typeNumber: 20,
                     invert: true,
@@ -51,25 +34,33 @@ describe('QRCodeText', () => {
                     whiteSymbol: '0',
                 },
             );
-            expect(qrCode.value).toEqual('test 84');
-            expect(qrCode.padding).toEqual(0);
-            expect(qrCode.level).toEqual('H');
-            expect(qrCode.typeNumber).toEqual(20);
-            expect(qrCode.errorsEnabled).toBeTruthy();
-            expect(qrCode.invert).toBeTruthy();
-            expect(qrCode.blackSymbol).toEqual('1');
-            expect(qrCode.whiteSymbol).toEqual('0');
+            expect(qrCode.getBlackSymbol()).toEqual('1');
+            expect(qrCode.getWhiteSymbol()).toEqual('0');
         });
     });
 
     describe('_clearCache', () => {
+        class TestClass extends QRCodeText {
+
+            callClearCache() {
+                this._clearCache();
+            }
+
+            getQrCodeData() {
+                return this._qrCodeData;
+            }
+
+            getQrCodeText() {
+                return this._qrCodeText;
+            }
+
+        }
         it('should clear qrCodeData and qrCodeText', () => {
-            const qrCode = new QRCodeText('test');
-            qrCode.qrCodeData = [1, 2, 3, 4];
-            qrCode.qrCodeText = '1-2-3-4';
-            qrCode._clearCache();
-            expect(qrCode.qrCodeData).toBeNull();
-            expect(qrCode.qrCodeText).toBeNull();
+            const qrCode = new TestClass('test');
+            expect(qrCode.getData()).not.toBeNull();
+            qrCode.callClearCache();
+            expect(qrCode.getQrCodeData()).toBeNull();
+            expect(qrCode.getQrCodeText()).toBeNull();
         });
     });
 

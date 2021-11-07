@@ -8,162 +8,234 @@
  * file that was distributed with this source code.
  */
 
-import AbstractQRCodeWithImage from './AbstractQRCodeWithImage';
-
-let mockQRCode;
+import AbstractQRCodeWithImage, { ImageCompiledConfigInf, ImageConfigInf } from './AbstractQRCodeWithImage';
+import { ImageInf } from "./image/ImageInf";
+import { CanvasInf } from "./canvas/CanvasInf";
 
 jest.mock('qr.js/lib/QRCode', () => {
-    return function () {
-        Object.assign(this, mockQRCode);
-    };
+    return class {
+
+        modules: boolean[][] | null = null;
+
+        make() {
+            this.modules = [
+                [true, true, true, true, true],
+                [true, false, false, false, true],
+                [true, false, true, false, true],
+                [true, false, false, false, true],
+                [true, true, true, true, true],
+            ];
+        }
+
+        addData = (value: string) => {
+            if (value === 'bad') {
+                throw new Error('Some error');
+            }
+        }
+
+    }
 });
 
 describe('AbstractQRCodeWithImage', () => {
 
     describe('constructor', () => {
-        it('should use default params if nothing is provided', () => {
-            const qrCode = new AbstractQRCodeWithImage();
-            expect(qrCode.value).toBeUndefined();
-            expect(qrCode.padding).toEqual(1);
-            expect(qrCode.level).toEqual('L');
-            expect(qrCode.typeNumber).toEqual(0);
-            expect(qrCode.errorsEnabled).toBeFalsy();
-            expect(qrCode.invert).toBeFalsy();
-            expect(qrCode.image).toBeNull();
-        });
+        class TestClass extends AbstractQRCodeWithImage {
 
-        it('should default params for not specified params', () => {
-            const qrCode = new AbstractQRCodeWithImage('test 42', { level: 'Q', size: 100 });
-            expect(qrCode.value).toEqual('test 42');
-            expect(qrCode.padding).toEqual(1);
-            expect(qrCode.level).toEqual('Q');
-            expect(qrCode.typeNumber).toEqual(0);
-            expect(qrCode.errorsEnabled).toBeFalsy();
-            expect(qrCode.invert).toBeFalsy();
-            expect(qrCode.image).toBeNull();
+            getImageConfig() {
+                return super._getImageCompiledConfig();
+            }
+
+        }
+
+        it('should use default params if nothing is provided', () => {
+            const qrCode = new TestClass('');
+            expect(qrCode.getImageConfig()).toBeNull();
         });
 
         it('should use specified params', () => {
-            const qrCode = new AbstractQRCodeWithImage(
+            const qrCode = new TestClass(
                 'test 84',
                 {
-                    level: 'H',
-                    padding: 0,
-                    typeNumber: 20,
                     invert: true,
                     errorsEnabled: true,
+                    padding: 3,
                     image: {
                         source: 'some-url.png',
                         width: 100,
                         height: 100,
+                        x: 0,
+                        y: 0,
+                        border: null,
                     },
                 },
             );
-            expect(qrCode.value).toEqual('test 84');
-            expect(qrCode.padding).toEqual(0);
-            expect(qrCode.level).toEqual('H');
-            expect(qrCode.typeNumber).toEqual(20);
-            expect(qrCode.errorsEnabled).toBeTruthy();
-            expect(qrCode.invert).toBeTruthy();
-            expect(qrCode.image).toEqual({
+            expect(qrCode.getImageConfig()).toEqual({
                 source: 'some-url.png',
                 width: 100,
                 height: 100,
+                x: 3,
+                y: 3,
+                border: null,
             });
         });
     });
 
     describe('_clearCache', () => {
-        it('should clear qrCodeData and qrCodeText', () => {
-            const qrCode = new AbstractQRCodeWithImage('test');
-            qrCode.imageConfig = {
+        class TestClass extends AbstractQRCodeWithImage {
+
+            setImageCompiledConfig(cfg: ImageCompiledConfigInf) {
+                this._imageCompiledConfig = cfg;
+            }
+
+            getImageCompiledConfig() {
+                return this._imageCompiledConfig;
+            }
+
+            callClearCache() {
+                this._clearCache();
+            }
+
+        }
+
+        it('should clear TestClass and qrCodeText', () => {
+            const qrCode = new TestClass('test');
+            qrCode.setImageCompiledConfig({
                 source: 'some-url.png',
                 width: 100,
                 height: 100,
-            };
-            qrCode._clearCache();
-            expect(qrCode.imageConfig).toBeNull();
+                x: 0,
+                y: 0,
+                border: null,
+            });
+            qrCode.callClearCache();
+            expect(qrCode.getImageCompiledConfig()).toBeNull();
         });
     });
 
     describe('_getImageSource', () => {
+        class TestClass extends AbstractQRCodeWithImage {
+
+            getImageSource(cfg: ImageConfigInf) {
+                return this._getImageSource(cfg);
+            }
+
+        }
+
         it('should return string if string is passed', () => {
-            const qrCode = new AbstractQRCodeWithImage('test');
-            expect(qrCode._getImageSource({ source: 'foo-bar.png' })).toEqual('foo-bar.png');
+            const qrCode = new TestClass('test');
+            expect(qrCode.getImageSource({ source: 'foo-bar.png' } as ImageConfigInf)).toEqual('foo-bar.png');
         });
 
-        it('should return Image.src if Image is passed', () => {
-            const qrCode = new AbstractQRCodeWithImage('test');
-            const img = new Image();
-            img.src = 'https://some-url.com/foo.png';
-            expect(qrCode._getImageSource({ source: img })).toEqual('https://some-url.com/foo.png');
+        it('should return Image.src if passed object is instance of Image', () => {
+            const qrCode = new TestClass('test');
+            const img: ImageInf = {
+                width: 100,
+                height: 100,
+                naturalWidth: 100,
+                naturalHeight: 100,
+                alt: '',
+                src: 'https://some-url.com/foo.png',
+                complete: true,
+                onload: null,
+            };
+            expect(qrCode.getImageSource({ source: img } as any)).toEqual('https://some-url.com/foo.png');
         });
 
         it('should return Canvas.toDataUrl if Canvas is passed', () => {
-            const qrCode = new AbstractQRCodeWithImage('test');
-            const canvas = document.createElement('canvas');
-            canvas.toDataURL = jest.fn(() => 'data:foo-bar');
-            expect(qrCode._getImageSource({ source: canvas })).toEqual('data:foo-bar');
-            expect(canvas.toDataURL).toHaveBeenCalled();
+            const qrCode = new TestClass('test');
+            const canvas: CanvasInf = {
+                width: 100,
+                height: 100,
+                getContext: () => null,
+                toDataURL: jest.fn(() => 'data:foo-bar'),
+            };
+            expect(qrCode.getImageSource({ source: canvas } as any)).toEqual('data:foo-bar');
+            expect(canvas.toDataURL).toHaveBeenCalledTimes(1);
         });
 
         it('should return null if source has wrong type', () => {
-            const qrCode = new AbstractQRCodeWithImage('test');
-            expect(qrCode._getImageSource({ source: true })).toEqual(null);
-            expect(qrCode._getImageSource({ source: 42 })).toEqual(null);
-            expect(qrCode._getImageSource({ source: undefined })).toEqual(null);
-            expect(qrCode._getImageSource({ source: null })).toEqual(null);
+            const qrCode = new TestClass('test');
+            expect(qrCode.getImageSource({ source: true } as any)).toEqual(null);
+            expect(qrCode.getImageSource({ source: 42 } as any)).toEqual(null);
+            expect(qrCode.getImageSource({ source: undefined } as any)).toEqual(null);
+            expect(qrCode.getImageSource({ source: null } as any)).toEqual(null);
         });
     });
 
-    describe('_getImageConfig', () => {
-        let qrCode;
+    describe('_getImageCompiledConfig', () => {
+        class TestClass extends AbstractQRCodeWithImage {
+
+            setImageConfig(cfg: any) {
+                this._imageConfig = cfg;
+            }
+
+            getImageConfig() {
+                return this._imageConfig as any;
+            }
+
+            setImageCompiledConfig(cfg: any) {
+                this._imageCompiledConfig = cfg;
+            }
+
+            getImageCompiledConfig() {
+                return this._getImageCompiledConfig();
+            }
+
+            setPadding(value: any) {
+                this._padding = value;
+            }
+
+        }
+
+        let qrCode: TestClass;
 
         beforeEach(() => {
-            qrCode = new AbstractQRCodeWithImage('test', {
+            qrCode = new TestClass('test', {
                 padding: 0,
                 image: {
                     source: 'https://someurl.com/img.png',
                     width: 10,
                     height: 10,
                     border: 0,
+                    x: 0,
+                    y: 0,
                 },
             });
             qrCode.getDataSize = jest.fn(() => 42);
         });
 
         it('should return cached imageConfig', () => {
-            qrCode.imageConfig = { foo: 'bar' };
-            expect(qrCode._getImageConfig()).toEqual({ foo: 'bar' });
+            qrCode.setImageCompiledConfig({ foo: 'bar' });
+            expect(qrCode.getImageCompiledConfig()).toEqual({ foo: 'bar' });
         });
 
         it('should return null if image is not provided', () => {
-            qrCode.image = null;
-            expect(qrCode._getImageConfig()).toBeNull();
+            qrCode.setImageConfig(null);
+            expect(qrCode.getImageCompiledConfig()).toBeNull();
         });
 
         it('should return null if image.source is not provided', () => {
-            qrCode.image.source = null;
-            expect(qrCode._getImageConfig()).toBeNull();
+            qrCode.getImageConfig().source = null;
+            expect(qrCode.getImageCompiledConfig()).toBeNull();
         });
 
         it('should return null if image.width is not provided', () => {
-            qrCode.image.width = null;
-            expect(qrCode._getImageConfig()).toBeNull();
+            qrCode.getImageConfig().width = null;
+            expect(qrCode.getImageCompiledConfig()).toBeNull();
         });
-
+        //
         it('should return null if image.height is not provided', () => {
-            qrCode.image.height = null;
-            expect(qrCode._getImageConfig()).toBeNull();
+            qrCode.getImageConfig().height = null;
+            expect(qrCode.getImageCompiledConfig()).toBeNull();
         });
 
         it('should return null if dataSize is empty', () => {
             qrCode.getDataSize = jest.fn(() => 0);
-            expect(qrCode._getImageConfig()).toBeNull();
+            expect(qrCode.getImageCompiledConfig()).toBeNull();
         });
 
         it('should return imageConfig if dataSize is empty', () => {
-            expect(qrCode._getImageConfig()).toEqual({
+            expect(qrCode.getImageCompiledConfig()).toEqual({
                 source: 'https://someurl.com/img.png',
                 border: 0,
                 width: 10,
@@ -174,8 +246,8 @@ describe('AbstractQRCodeWithImage', () => {
         });
 
         it('should return increase X & Y on padding size', () => {
-            qrCode.padding = 4;
-            expect(qrCode._getImageConfig()).toEqual({
+            qrCode.setPadding(4);
+            expect(qrCode.getImageCompiledConfig()).toEqual({
                 source: 'https://someurl.com/img.png',
                 border: 0,
                 width: 10,
@@ -184,10 +256,10 @@ describe('AbstractQRCodeWithImage', () => {
                 y: 4,
             });
 
-            qrCode.imageConfig = null;
-            qrCode.image.x = 'right';
-            qrCode.image.y = 'center';
-            expect(qrCode._getImageConfig()).toEqual({
+            qrCode.setImageCompiledConfig(null);
+            qrCode.getImageConfig().x = 'right';
+            qrCode.getImageConfig().y = 'center';
+            expect(qrCode.getImageCompiledConfig()).toEqual({
                 source: 'https://someurl.com/img.png',
                 border: 0,
                 width: 10,
@@ -198,10 +270,10 @@ describe('AbstractQRCodeWithImage', () => {
         });
 
         it('should calculate width and height without padding', () => {
-            qrCode.padding = 5;
-            qrCode.image.width = '100%';
-            qrCode.image.height = '50%';
-            expect(qrCode._getImageConfig()).toEqual({
+            qrCode.setPadding(5);
+            qrCode.getImageConfig().width = '100%';
+            qrCode.getImageConfig().height = '50%';
+            expect(qrCode.getImageCompiledConfig()).toEqual({
                 source: 'https://someurl.com/img.png',
                 border: 0,
                 width: 32,
@@ -213,22 +285,16 @@ describe('AbstractQRCodeWithImage', () => {
     });
 
     describe('getData', () => {
-        beforeEach(() => {
-            mockQRCode = {
-                addData: jest.fn(),
-                make: jest.fn(),
-                modules: [
-                    [true, true, true, true, true],
-                    [true, false, false, false, true],
-                    [true, false, true, false, true],
-                    [true, false, false, false, true],
-                    [true, true, true, true, true],
-                ],
-            };
-        });
+        class TestClass extends AbstractQRCodeWithImage {
+
+            getImageCompiledConfig() {
+                return this._getImageCompiledConfig();
+            }
+
+        }
 
         it('should not change data if image is not provided', () => {
-            const qrCode = new AbstractQRCodeWithImage('test');
+            const qrCode = new TestClass('test');
             expect(qrCode.getData()).toEqual([
                 [false, false, false, false, false, false, false],
                 [false, true, true, true, true, true, false],
@@ -241,7 +307,7 @@ describe('AbstractQRCodeWithImage', () => {
         });
 
         it('should not change data if image.border is not number', () => {
-            const qrCode = new AbstractQRCodeWithImage('test', {
+            const qrCode = new TestClass('test', {
                 image: {
                     source: 'foo.png',
                     x: 'center',
@@ -263,7 +329,7 @@ describe('AbstractQRCodeWithImage', () => {
         });
 
         it('should remove data under image if image.border is 0', () => {
-            const qrCode = new AbstractQRCodeWithImage('test', {
+            const qrCode = new TestClass('test', {
                 image: {
                     source: 'foo.png',
                     x: 'right',
@@ -282,7 +348,7 @@ describe('AbstractQRCodeWithImage', () => {
                 [false, true, true, false, false, false, false],
                 [false, false, false, false, false, false, false],
             ]);
-            expect(qrCode.imageConfig).toEqual({
+            expect(qrCode.getImageCompiledConfig()).toEqual({
                 source: 'foo.png',
                 x: 3,
                 y: 4,
@@ -293,7 +359,7 @@ describe('AbstractQRCodeWithImage', () => {
         });
 
         it('should remove data under image and border if image.border is greater than 0', () => {
-            const qrCode = new AbstractQRCodeWithImage('test', {
+            const qrCode = new TestClass('test', {
                 image: {
                     source: 'foo.png',
                     x: 'right',
@@ -312,7 +378,7 @@ describe('AbstractQRCodeWithImage', () => {
                 [false, true, false, false, false, false, false],
                 [false, false, false, false, false, false, false],
             ]);
-            expect(qrCode.imageConfig).toEqual({
+            expect(qrCode.getImageCompiledConfig()).toEqual({
                 source: 'foo.png',
                 x: 3,
                 y: 4,
@@ -323,7 +389,7 @@ describe('AbstractQRCodeWithImage', () => {
         });
 
         it('should use default border = 1if image.border is not provided', () => {
-            const qrCode = new AbstractQRCodeWithImage('test', {
+            const qrCode = new TestClass('test', {
                 image: {
                     source: 'foo.png',
                     x: 'right',
@@ -341,7 +407,7 @@ describe('AbstractQRCodeWithImage', () => {
                 [false, true, false, false, false, false, false],
                 [false, false, false, false, false, false, false],
             ]);
-            expect(qrCode.imageConfig).toEqual({
+            expect(qrCode.getImageCompiledConfig()).toEqual({
                 source: 'foo.png',
                 x: 3,
                 y: 4,
@@ -352,7 +418,7 @@ describe('AbstractQRCodeWithImage', () => {
         });
 
         it('should remove data under image and min border if image.border is less than 0', () => {
-            const qrCode = new AbstractQRCodeWithImage('test', {
+            const qrCode = new TestClass('test', {
                 image: {
                     source: 'foo.png',
                     x: 'center',
@@ -371,7 +437,7 @@ describe('AbstractQRCodeWithImage', () => {
                 [false, true, true, true, true, true, false],
                 [false, false, false, false, false, false, false],
             ]);
-            expect(qrCode.imageConfig).toEqual({
+            expect(qrCode.getImageCompiledConfig()).toEqual({
                 source: 'foo.png',
                 x: 1,
                 y: 1,
@@ -382,7 +448,7 @@ describe('AbstractQRCodeWithImage', () => {
         });
 
         it('should calculate well inverted data', () => {
-            const qrCode = new AbstractQRCodeWithImage('test', {
+            const qrCode = new TestClass('test', {
                 invert: true,
                 image: {
                     source: 'foo.png',
@@ -402,7 +468,7 @@ describe('AbstractQRCodeWithImage', () => {
                 [true, false, false, true, true, true, true],
                 [true, true, true, true, true, true, true],
             ]);
-            expect(qrCode.imageConfig).toEqual({
+            expect(qrCode.getImageCompiledConfig()).toEqual({
                 source: 'foo.png',
                 x: 3,
                 y: 4,
@@ -413,7 +479,7 @@ describe('AbstractQRCodeWithImage', () => {
         });
 
         it('should calculate well large border', () => {
-            const qrCode = new AbstractQRCodeWithImage('test', {
+            const qrCode = new TestClass('test', {
                 image: {
                     source: 'foo.png',
                     x: 'center',

@@ -1,4 +1,3 @@
-// @flow
 /*
  * This file is part of QR code library
  * git: https://github.com/cheprasov/js-qrcode
@@ -22,13 +21,13 @@ export default class ColorUtils {
         switch (hex.length) {
             case 3:
                 hex += 'F';
-            // Fall through
+                // Fall through
             case 4:
                 bytes.push(...hex.split('').map(h => parseInt(h.repeat(2), 16)));
                 break;
             case 6:
                 hex += 'FF';
-            // Fall through
+                // Fall through
             case 8:
                 bytes.push(parseInt(hex.substr(0, 2), 16));
                 bytes.push(parseInt(hex.substr(2, 2), 16));

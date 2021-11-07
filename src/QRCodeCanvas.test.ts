@@ -7,6 +7,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+// @ts-nocheck
 
 import QRCodeCanvas from './QRCodeCanvas';
 
@@ -32,30 +33,30 @@ describe('QRCodeCanvas', () => {
     describe('constructor', () => {
         it('should use default params if nothing is provided', () => {
             const qrCode = new QRCodeCanvas();
-            expect(qrCode.value).toBeUndefined();
-            expect(qrCode.padding).toEqual(1);
-            expect(qrCode.level).toEqual('L');
-            expect(qrCode.typeNumber).toEqual(0);
-            expect(qrCode.errorsEnabled).toBeFalsy();
-            expect(qrCode.invert).toBeFalsy();
-            expect(qrCode.fgColor).toEqual('#000');
-            expect(qrCode.bgColor).toEqual('#FFF');
-            expect(qrCode.scale).toEqual(10);
-            expect(qrCode.size).toBeNull();
+            expect(qrCode._value).toBeUndefined();
+            expect(qrCode._padding).toEqual(1);
+            expect(qrCode._level).toEqual('L');
+            expect(qrCode._typeNumber).toEqual(0);
+            expect(qrCode._areErrorsEnabled).toBeFalsy();
+            expect(qrCode._isInvert).toBeFalsy();
+            expect(qrCode._fgColor).toEqual('#000');
+            expect(qrCode._bgColor).toEqual('#FFF');
+            expect(qrCode._scale).toEqual(10);
+            expect(qrCode._size).toBeNull();
         });
 
         it('should default params for not specified params', () => {
             const qrCode = new QRCodeCanvas('test 42', { level: 'Q', size: 100 });
-            expect(qrCode.value).toEqual('test 42');
-            expect(qrCode.padding).toEqual(1);
-            expect(qrCode.level).toEqual('Q');
-            expect(qrCode.typeNumber).toEqual(0);
-            expect(qrCode.errorsEnabled).toBeFalsy();
-            expect(qrCode.invert).toBeFalsy();
-            expect(qrCode.fgColor).toEqual('#000');
-            expect(qrCode.bgColor).toEqual('#FFF');
-            expect(qrCode.scale).toEqual(10);
-            expect(qrCode.size).toEqual(100);
+            expect(qrCode._value).toEqual('test 42');
+            expect(qrCode._padding).toEqual(1);
+            expect(qrCode._level).toEqual('Q');
+            expect(qrCode._typeNumber).toEqual(0);
+            expect(qrCode._areErrorsEnabled).toBeFalsy();
+            expect(qrCode._isInvert).toBeFalsy();
+            expect(qrCode._fgColor).toEqual('#000');
+            expect(qrCode._bgColor).toEqual('#FFF');
+            expect(qrCode._scale).toEqual(10);
+            expect(qrCode._size).toEqual(100);
         });
 
         it('should use specified params', () => {
@@ -73,16 +74,16 @@ describe('QRCodeCanvas', () => {
                     size: 100,
                 },
             );
-            expect(qrCode.value).toEqual('test 84');
-            expect(qrCode.padding).toEqual(0);
-            expect(qrCode.level).toEqual('H');
-            expect(qrCode.typeNumber).toEqual(20);
-            expect(qrCode.errorsEnabled).toBeTruthy();
-            expect(qrCode.invert).toBeTruthy();
-            expect(qrCode.fgColor).toEqual('#AAAA');
-            expect(qrCode.bgColor).toEqual('#FFF0');
-            expect(qrCode.scale).toEqual(11);
-            expect(qrCode.size).toEqual(100);
+            expect(qrCode._value).toEqual('test 84');
+            expect(qrCode._padding).toEqual(0);
+            expect(qrCode._level).toEqual('H');
+            expect(qrCode._typeNumber).toEqual(20);
+            expect(qrCode._areErrorsEnabled).toBeTruthy();
+            expect(qrCode._isInvert).toBeTruthy();
+            expect(qrCode._fgColor).toEqual('#AAAA');
+            expect(qrCode._bgColor).toEqual('#FFF0');
+            expect(qrCode._scale).toEqual(11);
+            expect(qrCode._size).toEqual(100);
         });
 
         it('should create alias toDataURL for method toDataUrl', () => {
@@ -94,9 +95,9 @@ describe('QRCodeCanvas', () => {
     describe('_clearCache', () => {
         it('should clear qrCodeData and qrCodeText', () => {
             const qrCode = new QRCodeCanvas('test');
-            qrCode.qrCodeData = [1, 2, 3, 4];
+            qrCode._qrCodeData = [1, 2, 3, 4];
             qrCode._clearCache();
-            expect(qrCode.qrCodeData).toBeNull();
+            expect(qrCode._qrCodeData).toBeNull();
         });
     });
 
@@ -248,8 +249,8 @@ describe('QRCodeCanvas', () => {
             ]);
             const qrCodeCanvas = qrCode.draw();
             expect(qrCodeCanvas).toBeInstanceOf(HTMLCanvasElement);
-            expect(qrCode.canvasContext.putImageData).toHaveBeenCalledTimes(1);
-            const putImageDataArgs = qrCode.canvasContext.putImageData.mock.calls[0];
+            expect(qrCode._canvasContext.putImageData).toHaveBeenCalledTimes(1);
+            const putImageDataArgs = qrCode._canvasContext.putImageData.mock.calls[0];
             const imageData = putImageDataArgs[0];
             expect(imageData).toBeInstanceOf(ImageData);
             expect(imageData.bytes).toBeInstanceOf(Uint8ClampedArray);
@@ -265,8 +266,8 @@ describe('QRCodeCanvas', () => {
             expect(imageData.width).toEqual(5);
             expect(imageData.height).toEqual(5);
 
-            expect(qrCode.canvas.width).toEqual(5);
-            expect(qrCode.canvas.height).toEqual(5);
+            expect(qrCode._canvas.width).toEqual(5);
+            expect(qrCode._canvas.height).toEqual(5);
 
             expect(putImageDataArgs[1]).toEqual(0);
             expect(putImageDataArgs[2]).toEqual(0);
@@ -274,7 +275,7 @@ describe('QRCodeCanvas', () => {
             expect(qrCodeCanvas.mockedContext.imageSmoothingEnabled).toEqual(false);
             expect(qrCodeCanvas.width).toEqual(40);
             expect(qrCodeCanvas.height).toEqual(40);
-            expect(qrCodeCanvas.mockedContext.drawImage).toHaveBeenCalledWith(qrCode.canvas, 0, 0, 40, 40);
+            expect(qrCodeCanvas.mockedContext.drawImage).toHaveBeenCalledWith(qrCode._canvas, 0, 0, 40, 40);
         });
 
         it('should draw QR code and return provided canvas', () => {
@@ -290,8 +291,8 @@ describe('QRCodeCanvas', () => {
             const qrCodeCanvas = qrCode.draw(canvas);
             expect(qrCodeCanvas).toBeInstanceOf(HTMLCanvasElement);
             expect(qrCodeCanvas).toBe(canvas);
-            expect(qrCode.canvasContext.putImageData).toHaveBeenCalledTimes(1);
-            const putImageDataArgs = qrCode.canvasContext.putImageData.mock.calls[0];
+            expect(qrCode._canvasContext.putImageData).toHaveBeenCalledTimes(1);
+            const putImageDataArgs = qrCode._canvasContext.putImageData.mock.calls[0];
             const imageData = putImageDataArgs[0];
             expect(imageData).toBeInstanceOf(ImageData);
             expect(imageData.bytes).toBeInstanceOf(Uint8ClampedArray);
@@ -307,8 +308,8 @@ describe('QRCodeCanvas', () => {
             expect(imageData.width).toEqual(5);
             expect(imageData.height).toEqual(5);
 
-            expect(qrCode.canvas.width).toEqual(5);
-            expect(qrCode.canvas.height).toEqual(5);
+            expect(qrCode._canvas.width).toEqual(5);
+            expect(qrCode._canvas.height).toEqual(5);
 
             expect(putImageDataArgs[1]).toEqual(0);
             expect(putImageDataArgs[2]).toEqual(0);
@@ -316,7 +317,7 @@ describe('QRCodeCanvas', () => {
             expect(qrCodeCanvas.mockedContext.imageSmoothingEnabled).toEqual(false);
             expect(qrCodeCanvas.width).toEqual(40);
             expect(qrCodeCanvas.height).toEqual(40);
-            expect(qrCodeCanvas.mockedContext.drawImage).toHaveBeenCalledWith(qrCode.canvas, 0, 0, 40, 40);
+            expect(qrCodeCanvas.mockedContext.drawImage).toHaveBeenCalledWith(qrCode._canvas, 0, 0, 40, 40);
         });
     });
 
