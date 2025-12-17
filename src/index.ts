@@ -1,4 +1,3 @@
-// @flow
 /*
  * This file is part of QR code library
  * git: https://github.com/cheprasov/js-qrcode
@@ -14,3 +13,11 @@ export { default as QRCodeRaw } from './QRCodeRaw';
 export { default as QRCodeSVG } from './QRCodeSVG';
 export { default as QRCodeText } from './QRCodeText';
 export { default as AbstractQRCodeWithImage } from './AbstractQRCodeWithImage';
+
+export type {
+  ErrorCorrectionLevelType,
+  Options as QRCodeRawOptions,
+  QRCodeDataType,
+} from './QRCodeRaw';
+
+export type { ImageConfig, ImageSource } from './AbstractQRCodeWithImage';

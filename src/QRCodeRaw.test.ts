@@ -1,4 +1,3 @@
-// @flow
 /*
  * This file is part of QR code library
  * git: https://github.com/cheprasov/js-qrcode
@@ -23,8 +22,8 @@ describe('QRCodeRaw', () => {
 
     describe('constructor', () => {
         it('should use default params if nothing is provided', () => {
-            const qrCode = new QRCodeRaw();
-            expect(qrCode.value).toBeUndefined();
+            const qrCode = new QRCodeRaw('');
+            expect(qrCode.value).toEqual('');
             expect(qrCode.padding).toEqual(1);
             expect(qrCode.level).toEqual('L');
             expect(qrCode.typeNumber).toEqual(0);
@@ -65,11 +64,11 @@ describe('QRCodeRaw', () => {
     describe('setValue', () => {
         it('should set new value and clear cache', () => {
             const qrCode = new QRCodeRaw('test');
-            qrCode._clearCache = jest.fn();
+            (qrCode as any)._clearCache = jest.fn();
 
             qrCode.setValue('foo 42');
             expect(qrCode.value).toEqual('foo 42');
-            expect(qrCode._clearCache).toHaveBeenCalled();
+            expect((qrCode as any)._clearCache).toHaveBeenCalled();
         });
     });
 
@@ -90,9 +89,9 @@ describe('QRCodeRaw', () => {
     describe('_clearCache', () => {
         it('should clear qrCodeData', () => {
             const qrCode = new QRCodeRaw('test');
-            qrCode.qrCodeData = [1, 2, 3, 4];
-            qrCode._clearCache();
-            expect(qrCode.qrCodeData).toBeNull();
+            (qrCode as any).qrCodeData = [1, 2, 3, 4];
+            (qrCode as any)._clearCache();
+            expect((qrCode as any).qrCodeData).toBeNull();
         });
     });
 
@@ -109,7 +108,7 @@ describe('QRCodeRaw', () => {
                 [true, false, true],
                 [true, true, true],
             ];
-            const result = qrCode._getQrCodeData(source);
+            const result = (qrCode as any)._getQrCodeData(source);
             expect(result).toEqual(source);
             expect(result).not.toBe(source);
             source[1][1] = true;
@@ -123,7 +122,7 @@ describe('QRCodeRaw', () => {
                 [false, true, true],
             ];
             qrCode.invert = true;
-            const result = qrCode._getQrCodeData(source);
+            const result = (qrCode as any)._getQrCodeData(source);
             expect(result).toEqual([
                 [true, false, false],
                 [false, true, false],
@@ -138,7 +137,7 @@ describe('QRCodeRaw', () => {
                 [false, true, true],
             ];
             qrCode.padding = 1;
-            expect(qrCode._getQrCodeData(source)).toEqual([
+            expect((qrCode as any)._getQrCodeData(source)).toEqual([
                 [false, false, false, false, false],
                 [false, false, true, true, false],
                 [false, true, false, true, false],
@@ -147,7 +146,7 @@ describe('QRCodeRaw', () => {
             ]);
 
             qrCode.padding = 3;
-            expect(qrCode._getQrCodeData(source)).toEqual([
+            expect((qrCode as any)._getQrCodeData(source)).toEqual([
                 [false, false, false, false, false, false, false, false, false],
                 [false, false, false, false, false, false, false, false, false],
                 [false, false, false, false, false, false, false, false, false],
@@ -169,7 +168,7 @@ describe('QRCodeRaw', () => {
 
             qrCode.invert = true;
             qrCode.padding = 3;
-            expect(qrCode._getQrCodeData(source)).toEqual([
+            expect((qrCode as any)._getQrCodeData(source)).toEqual([
                 [true, true, true, true, true, true, true, true, true],
                 [true, true, true, true, true, true, true, true, true],
                 [true, true, true, true, true, true, true, true, true],
@@ -191,7 +190,7 @@ describe('QRCodeRaw', () => {
         });
 
         it('should return cached data', () => {
-            qrCode.qrCodeData = [1, 2, 3, 4];
+            (qrCode as any).qrCodeData = [1, 2, 3, 4];
             expect(qrCode.getData()).toEqual([1, 2, 3, 4]);
         });
 

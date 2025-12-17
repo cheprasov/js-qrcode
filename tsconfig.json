@@ -1,20 +1,11 @@
 {
-  "compilerOptions": {
-    "target": "ES2019",
-    "lib": ["ES2019", "DOM"],
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "outDir": "dist"
-  },
-  "include": ["src/**/*.ts"],
-  "exclude": ["dist", "node_modules", "**/*.test.ts"]
+    "compilerOptions": {
+        "strict": true,
+        "strictNullChecks": true
+    },
+    "files": [],
+    "references": [
+      { "path": "./tsconfig.build.json" },
+      { "path": "./tsconfig.jest.json" }
+    ]
 }
